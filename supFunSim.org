@@ -1,5 +1,4 @@
 #+TITLE: supFunSim.org
-#+SHORT_TITLE: simulationsFinal.org
 #+AUTHOR: Jan Nikadon, Tomasz Piotrowski, Dania Gutiérrez
 #+EMAIL: nikadon [at] gmail [dot] com
 
