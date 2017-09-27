@@ -3348,6 +3348,22 @@ if isequal(LOOP.table_varN{:}), LOOP.table_varN = LOOP.table_varN{1}; else, erro
 
    #+END_SRC
 
+** DOIN [s41] Localization Prelude
+*** !opt Comments
+**** TODO TODO
+
+     - [ ] tidy-up (copy) batch for localization
+     - [ ] pre-compute full leadfield based on arguments used in reconstruction
+     - [ ] tbc
+
+*** !run Code
+
+    #+BEGIN_SRC matlab :session *MATLAB* :eval yes :results silent :tangle no
+
+
+
+    #+END_SRC
+
 * DOIN Supplementaries
 ** DOIN [z00] Auxiliary functions
 *** =rawTimeSeries3d2d=

@@ -1,4 +1,4 @@
-fPath='/home/cybercraft/cc_overkill/git/supFunSim/';
+fPath='/home/cybercraft/cc/git/supFunSim/';
 
 % Tidy up and change working directory.
 clc; close all;clearvars('-except','fPath');
