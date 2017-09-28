@@ -3352,11 +3352,51 @@ if isequal(LOOP.table_varN{:}), LOOP.table_varN = LOOP.table_varN{1}; else, erro
 *** !opt Comments
 **** TODO TODO
 
+     - [ ] create new branch for localization
+     - [ ] pre-compute leadfield for each cortex and thalami node
+           (based on arguments used in reconstruction)
      - [ ] tidy-up (copy) batch for localization
-     - [ ] pre-compute full leadfield based on arguments used in reconstruction
-     - [ ] tbc
+     - [ ]
 
-*** !run Code
+*** !opt Prepare source localization candidate points
+
+    #+BEGIN_SRC matlab :session *MATLAB* :eval yes :results silent :tangle no
+
+whos
+sel_atl
+sel_geo_deep_thalami
+sel_geo_deep_icosahedron642
+
+size(sel_atl.pnt)
+size(sel_geo_deep_thalami.pnt)
+size(sel_geo_deep_icosahedron642.pnt)
+
+sel_src = []
+sel_src.pnt = [sel_geo_deep_thalami.pnt;sel_atl.pnt;sel_geo_deep_icosahedron642.pnt];
+sel_src.vn1 = [sel_geo_deep_thalami.vn1;sel_atl.vn1;sel_geo_deep_icosahedron642.vn1];
+sel_src
+size(sel_src.pnt)
+
+
+tmp_cfg            = [];
+tmp_cfg.grid.unit  = 'mm';
+tmp_cfg.reducerank = 'no';
+tmp_cfg.normalize  = 'no';
+tmp_cfg.elec       = sel_ele;
+tmp_cfg.vol        = sel_vol;
+
+tmp_cfg.grid.pos   = sel_src.pnt;
+tmp_cfg.grid.mom   = transpose(sel_src.vn1);
+sel_src.lfg        = ft_prepare_leadfield(tmp_cfg);
+sel_src.LFG        = cat(2,sel_src.lfg.leadfield{:});
+
+sel_src
+
+save('./mat/sel_src.mat','sel_src','-v7.3')
+
+    #+END_SRC
+
+*** !opt Checkup
 
     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :results silent :tangle no
 
