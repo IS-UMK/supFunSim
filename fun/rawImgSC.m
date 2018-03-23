@@ -1,3 +1,4 @@
+
 function [h1,h2] = rawImgSC(mat,varargin)
     h1 = imagesc(mat);
     [x,y] = ndgrid(1:size(mat,2),1:size(mat,1));

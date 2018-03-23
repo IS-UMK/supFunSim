@@ -1,3 +1,4 @@
+
 % note: S and G use only H_Src, as we want to recover only activity of interest, not interference 
 rec_flt.LCMV_R = pinv(S)*H_Src'*pinv(R);
 rec_flt.LCMV_N = pinv(G)*H_Src'*pinv(N);

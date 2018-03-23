@@ -1,3 +1,4 @@
+
 function [ ] = ccdisp( str )
 
 % CCDISP display as CYBERCRAFT

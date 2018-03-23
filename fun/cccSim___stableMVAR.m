@@ -1,3 +1,4 @@
+
 function A00 = cccSim___stableMVAR(S00,P00,M00,set_RNG,set_STAB,set_ITER)
 % procedure inspired by function stablemvar that is a part of MVARICA Toolbox.
     if 0

@@ -1,3 +1,4 @@
+
 for ii = 1:3
     sim_geo.ori_pert{ii} = normr(rawSphToCart(rawCartToSph(sim_geo.ori_orig{ii}) + [SETUP.CONE*0.5*(2*rand(size(sim_geo.ori_pert{ii},1),2)-1),zeros(size(sim_geo.ori_pert{ii},1),1)]));
 end

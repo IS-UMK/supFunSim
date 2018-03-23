@@ -1,3 +1,4 @@
+
 function [H,varargout] = rawIsStableMVAR(A00,varargin)
     if isempty(varargin)
         STAB = 1;

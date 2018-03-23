@@ -1,3 +1,4 @@
+
 clearvars sim_sig_SrcActiv tmp*
 sim_sig_SrcActiv = cccSim___makeSimSig(SETUP,1,'MVAR based signal for sources activity');
 clearvars ii jj kk nn tmp*

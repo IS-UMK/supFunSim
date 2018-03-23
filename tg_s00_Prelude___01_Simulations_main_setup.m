@@ -1,4 +1,5 @@
-fPath='/home/cybercraft/cc/git/supFunSim/';
+
+fPath='/home/metalipa/p14-revision/revision/supFunSim/';
 
 % Tidy up workspace and change working directory
 clc; close all;clearvars('-except','fPath');

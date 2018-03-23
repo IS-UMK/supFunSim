@@ -1,3 +1,4 @@
+
 function sim_sig_SrcActiv = cccSim___makeSimSig(SETUP,set_COL,varargin)
     sim_sig_SrcActiv.inf        = '';
     sim_sig_SrcActiv.S00        = [];
