@@ -25,7 +25,7 @@ SETUP.SRCS   = [ SETUP.SRCS; 0 3 2 ];
 SETUP.SRCS   = [ SETUP.SRCS; 0 3 2 ];
 SETUP.DEEP   = [             0 0 20 ]; % deep sources
 
-SETUP.ERPs   = 3;       % Add ERPs (timelocked activity)
+SETUP.ERPs   = 0;       % Add ERPs (timelocked activity)
 
 SETUP.rROI   = 1;       % random (1) or predefined (0) ROIs
 

@@ -2000,7 +2000,7 @@ C_SrcInt = pinv(S_SrcInt) - pinv(G_SrcInt);
 C_NL = C_SrcInt(1:size(H_Src,2),1:size(H_Src,2));
 C = pinv(S)-pinv(G);
 
-clear U_H_Int Si_H_Int V_H_Int G_SrcInt S_SrcInt C_SrcInt;
+clear U_H_Int Si_H_Int V_H_Int G_SrcInt S_SrcInt;
 
        #+END_SRC
 
@@ -2389,6 +2389,15 @@ rec_flt.NL = P_NL*pinv(H_SrcInt'*pinv(R)*H_SrcInt)*H_SrcInt'*pinv(R);
      #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s05_Spatial_filtering___02_Definitions.m :results silent
 
 rec_flt.MMSE = C*H_Src'*pinv(R);
+
+     #+END_SRC
+
+***** MMSE_INT
+
+     #+NAME: ./tg_s05_Spatial_filtering___02_Definitions.m
+     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s05_Spatial_filtering___02_Definitions.m :results silent
+
+rec_flt.MMSE_INT = C_SrcInt(1:size(H_Src,2),:)*H_SrcInt'*pinv(R);
 
      #+END_SRC
 
@@ -3058,7 +3067,7 @@ SETUP.SRCS   = [ SETUP.SRCS; 0 3 2 ];
 SETUP.SRCS   = [ SETUP.SRCS; 0 3 2 ];
 SETUP.DEEP   = [             0 0 20 ]; % deep sources
 
-SETUP.ERPs   = 3;       % Add ERPs (timelocked activity)
+SETUP.ERPs   = 0;       % Add ERPs (timelocked activity)
 
 SETUP.rROI   = 1;       % random (1) or predefined (0) ROIs
 
@@ -3194,8 +3203,6 @@ LOOP.rngSimCount = 1:LOOP.totSimCount;
 LOOP.rngMesNoise = 10;
 LOOP.rngBcgNoise = 0;
 LOOP.rngIntNoise = [0:5:20];
-
-SETUP.ERPs   = 4;       % Add ERPs (timelocked activity)
 
 LOOP
 SETUP

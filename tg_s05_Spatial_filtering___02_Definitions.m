@@ -8,6 +8,8 @@ rec_flt.NL = P_NL*pinv(H_SrcInt'*pinv(R)*H_SrcInt)*H_SrcInt'*pinv(R);
 
 rec_flt.MMSE = C*H_Src'*pinv(R);
 
+rec_flt.MMSE_INT = C_SrcInt(1:size(H_Src,2),:)*H_SrcInt'*pinv(R);
+
 rec_flt.ZF = pinv(H_Src);
 
 rec_flt.RANDN = randn(size(H_Src'));

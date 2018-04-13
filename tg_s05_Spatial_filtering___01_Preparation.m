@@ -57,7 +57,7 @@ C_SrcInt = pinv(S_SrcInt) - pinv(G_SrcInt);
 C_NL = C_SrcInt(1:size(H_Src,2),1:size(H_Src,2));
 C = pinv(S)-pinv(G);
 
-clear U_H_Int Si_H_Int V_H_Int G_SrcInt S_SrcInt C_SrcInt;
+clear U_H_Int Si_H_Int V_H_Int G_SrcInt S_SrcInt;
 
 %  NL filter as proposed in Hui & Leahy 2010
 H_SrcInt   = [H_Src H_Int];

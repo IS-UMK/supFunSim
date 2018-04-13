@@ -18,8 +18,6 @@ LOOP.rngMesNoise = 10;
 LOOP.rngBcgNoise = 0;
 LOOP.rngIntNoise = [0:5:20];
 
-SETUP.ERPs   = 4;       % Add ERPs (timelocked activity)
-
 LOOP
 SETUP
 
