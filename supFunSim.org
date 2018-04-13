@@ -1861,8 +1861,8 @@ clearvars ii jj kk nn tmp*
 
 *** !run Code
 
-    #+NAME: ./tg_s04_SNRs_Ardjustment.m
-    #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s04_SNRs_Ardjustment.m :results silent
+    #+NAME: ./tg_s04_SNRs_Adjustment.m
+    #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s04_SNRs_Adjustment.m :results silent
 
 clearvars ii jj kk nn tmp*
 
@@ -3146,7 +3146,7 @@ run('./tg_s03_Forward_modeling.m')
    #+NAME: ./tg_s07_BATCH___04_SNRs.m
    #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s07_BATCH___04_SNRs.m :results silent
 
-run('./tg_s04_SNRs_Ardjustment.m')
+run('./tg_s04_SNRs_Adjustment.m')
 
     #+END_SRC
 

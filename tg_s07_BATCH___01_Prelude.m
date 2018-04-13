@@ -1,5 +1,5 @@
 
-fPath='/home/metalipa/p14-revision/revision/supFunSim/';
+fPath='/home/metalipa/supFunSim/';
 
 % Tidy up and change working directory.
 clc; close all;clearvars('-except','fPath');
