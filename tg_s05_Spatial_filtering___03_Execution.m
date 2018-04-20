@@ -21,5 +21,4 @@ tmp_fltFields    = fieldnames(rec_flt);
 for nn = 1:length(tmp_fltFields),[~,rec_funDep_A00.(tmp_fltFields{nn}),~,~,~,~] = arfit(rec_sig.(tmp_fltFields{nn}),SETUP.P00,SETUP.P00);end
 
 tmp_allFields    = fieldnames(rec_funDep_A00);
-tmp_accf = [0:0.01:0.5];
-for nn = 1:length(tmp_allFields),rec_funDep_PDC.(tmp_allFields{nn}) = abs(PDC(rec_funDep_A00.(tmp_allFields{nn}),tmp_accf));end
+for nn = 1:length(tmp_allFields),rec_funDep_PDC.(tmp_allFields{nn}) = abs(PDC(rec_funDep_A00.(tmp_allFields{nn}),SETUP.PDC_RES));end

@@ -10,13 +10,13 @@ LOOP.DATE = datestr(now,'yyyymmdd_HHMMSS');
 LOOP.NAME = tempname; [~, LOOP.NAME] = fileparts(LOOP.NAME); % simulation unique name
 
 % Number of simulation runs for each SNRs combination
-LOOP.totSimCount = 1;
+LOOP.totSimCount = 2;
 LOOP.rngSimCount = 1:LOOP.totSimCount;
 
 % Range of SNRs (defaults are consequently [20], [0] and [0,10,20])
 LOOP.rngMesNoise = 10;
 LOOP.rngBcgNoise = 0;
-LOOP.rngIntNoise = [0:5:20];
+LOOP.rngIntNoise = [0:10:20];
 
 LOOP
 SETUP
@@ -28,23 +28,14 @@ LOOP.table_varN'
 LOOP.table_rowN
 size(LOOP.table_arrC)
 
-LOOP.table_arrC_avgSimCount = squeeze(mean(LOOP.table_arrC   ,3))
-LOOP.table_arrC_stdSimCount = squeeze( std(LOOP.table_arrC,[],3))
+LOOP.table_arrC_avgSimCount = squeeze(mean(LOOP.table_arrC,3))
+LOOP.table_arrC_stdSimCount = squeeze(std(LOOP.table_arrC,[],3))
 size(LOOP.table_arrC_avgSimCount)
 
 % PLOT THE RESULTS
-if 1
-    mySave = ['./res___',LOOP.DATE,'___',LOOP.NAME,'___',datestr(now,'yyyymmdd_HHMMSS')];
-    save(mySave)
-    LOOP
-    % remove dome filters from plot (for good)
-    myRem = not(ismember(LOOP.table_rowN,{'ZF','Dummy','ZEROS'}))
-    LOOP.table_rowN = LOOP.table_rowN(myRem,:)
-    LOOP.table_arrC_avgSimCount = LOOP.table_arrC_avgSimCount(myRem,:,:)
-    LOOP.table_arrC_stdSimCount = LOOP.table_arrC_stdSimCount(myRem,:,:)
-    LOOP.table_arrC = LOOP.table_arrC(myRem,:,:,:,:,:)
-
-end
+mySave = ['./res___',LOOP.DATE,'___',LOOP.NAME,'___',datestr(now,'yyyymmdd_HHMMSS')];
+save(mySave)
+LOOP
 
 close all
 for ii = 1:length(LOOP.table_varN)
@@ -80,19 +71,3 @@ for ii = 1:length(LOOP.table_varN)
     savefig(gcf,myName)
     saveas(gcf,myName,'pdf')
 end
-
-if 0
-
-ii = 0
-myName = ['./fig/',LOOP.DATE,'___',LOOP.NAME,'___fig_',num2str(ii),'___','overview']
-legend(gca,'off');
-cbh = findobj( 0, 'tag', 'Colorbar' ), % and
-delete( cbh )
-
-set(gca,'YScale','log')
-set(gca,'YScale','linear')
-
-end
-
-% Fig: 1, 2, 5, 6
-% Tylko

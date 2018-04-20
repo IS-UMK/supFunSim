@@ -269,6 +269,7 @@ SETUP.FRAC   = 0.20;    % proportion of ones to zeros in off-diagonal elements o
 SETUP.STAB   = 0.99;    % MVAR stability limit for MVAR eigenvalues (less than 1.0 results in more stable model producing more stationary signals)
 SETUP.RNG    = [0,2.8]; % range for pseudo-random sampling of eigenvalues for MVAR coefficients range
 SETUP.ITER   = 5e5;     % iterations limit for MVAR pseudo-random sampling and stability verification
+SETUP.PDC_RES = [0:0.01:0.5]; % resolution vector for normalized PDC estimation
 SETUP.TELL   = 1;       % provide additional comments during code execution ("tell me more")
 SETUP.PLOT   = 1;       % plot figures during the intermediate stages
 SETUP.SCRN   = get(0,'MonitorPositions'); % get screens positions
@@ -845,8 +846,7 @@ end
       #+BEGIN_SRC matlab :session *MATLAB* :eval no :tangle ./fun/cccSim___rawPlotA00.m :results silent
 
 function cccSim___rawPlotA00(A00)
-    tmp_accf = [0:0.01:0.5];
-    rawPlotPDC(abs(PDC(A00,tmp_accf)),tmp_accf);
+    rawPlotPDC(abs(PDC(A00,SETUP.PDC_RES)),SETUP.PDC_RES);
 end
 
       #+END_SRC
@@ -2562,8 +2562,7 @@ tmp_fltFields    = fieldnames(rec_flt);
 for nn = 1:length(tmp_fltFields),[~,rec_funDep_A00.(tmp_fltFields{nn}),~,~,~,~] = arfit(rec_sig.(tmp_fltFields{nn}),SETUP.P00,SETUP.P00);end
 
 tmp_allFields    = fieldnames(rec_funDep_A00);
-tmp_accf = [0:0.01:0.5];
-for nn = 1:length(tmp_allFields),rec_funDep_PDC.(tmp_allFields{nn}) = abs(PDC(rec_funDep_A00.(tmp_allFields{nn}),tmp_accf));end
+for nn = 1:length(tmp_allFields),rec_funDep_PDC.(tmp_allFields{nn}) = abs(PDC(rec_funDep_A00.(tmp_allFields{nn}),SETUP.PDC_RES));end
 
      #+END_SRC
 
@@ -2612,18 +2611,41 @@ whos rec*
 rec_sig
 
      #+END_SRC
+*** Preparation
+    
+    #+NAME: ./tg_s06_Error_evaluation.m
+    #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s06_Error_evaluation.m :results silent
+
+      clearvars ii jj kk nn tmp* 
+      tmp_allFields  = fieldnames(rec_sig);
+
+      for nn = 1:length(tmp_allFields)
+          for ii = 1:SETUP.n00
+              for jj = 1:SETUP.K00
+ rec_sig.(tmp_allFields{nn})(ii,:,jj)=rec_sig.(tmp_allFields{nn})(ii,:,jj)/norm(rec_sig.(tmp_allFields{nn})(ii,:,jj));
+              end
+          end
+      end
+
+    #+END_SRC
 
 *** =Euclid= for signal
 
     #+NAME: ./tg_s06_Error_evaluation.m
     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s06_Error_evaluation.m :results silent
 
-clearvars ii jj kk nn tmp* rec_sigAmp_ErrEuclid
-tmp_allFields  = fieldnames(rec_sig);
-for nn = 1:length(tmp_allFields),
-    rec_sigAmp_ErrEuclid.(tmp_allFields{nn}) = (norm(rec_sig.(tmp_allFields{1})(:) - rec_sig.(tmp_allFields{nn})(:))^2)/length(rec_sig.(tmp_allFields{1})(:));
-end
+      clearvars ii jj kk nn tmp* rec_sigAmp_ErrEuclid
+      tmp_allFields  = fieldnames(rec_sig);
 
+      for nn = 1:length(tmp_allFields)
+          tmp_error = zeros(SETUP.n00,SETUP.K00);
+          for ii = 1:SETUP.n00
+              for jj = 1:SETUP.K00
+                  tmp_error(ii,jj)=norm(rec_sig.(tmp_allFields{1})(ii,:,jj)-rec_sig.(tmp_allFields{nn})(ii,:,jj))^2;                  
+              end
+          end
+          rec_sigAmp_ErrEuclid.(tmp_allFields{nn})=mean(mean(tmp_error));
+      end
     #+END_SRC
 
 **** !opt Checkups
@@ -2647,12 +2669,19 @@ size(sim_sig_AdjSNRs.SrcActivPre)
     #+NAME: ./tg_s06_Error_evaluation.m
     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s06_Error_evaluation.m :results silent
 
-clearvars ii jj kk nn tmp* rec_sigAmp_ErrCorrCf
-tmp_allFields  = fieldnames(rec_sig);
-for nn = 1:length(tmp_allFields),
-    rec_sigAmp_ErrCorrCf.(tmp_allFields{nn}) = corrcoef(rec_sig.(tmp_allFields{1})(:),rec_sig.(tmp_allFields{nn})(:));
-    rec_sigAmp_ErrCorrCf.(tmp_allFields{nn}) = rec_sigAmp_ErrCorrCf.(tmp_allFields{nn})(1,end);
-end
+      clearvars ii jj kk nn tmp* rec_sigAmp_ErrCorrCf
+      tmp_allFields  = fieldnames(rec_sig);
+
+      for nn = 1:length(tmp_allFields)
+          tmp_error = zeros(sum(SETUP.SRCS(:,1)),SETUP.K00);
+          for kk = 1:sum(SETUP.SRCS(:,1))
+              for jj = 1:SETUP.K00
+                  tmp_x=corrcoef(rec_sig.(tmp_allFields{1})(:,kk,jj),rec_sig.(tmp_allFields{nn})(:,kk,jj));
+                  tmp_error(kk,jj)=tmp_x(1,end);
+              end
+          end
+          rec_sigAmp_ErrCorrCf.(tmp_allFields{nn}) = mean(mean(tmp_error));
+      end
 
      #+END_SRC
 
@@ -2661,17 +2690,12 @@ end
     #+NAME: ./tg_s06_Error_evaluation.m
     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s06_Error_evaluation.m :results silent
 
-clearvars ii jj kk nn tmp* rec_funDep_A00_ErrMonday rec_funDep_A00_ErrEuclid
-tmp_allFields  = fieldnames(rec_sig);
-for nn = 1:length(tmp_allFields)
-    rec_funDep_A00_ErrEuclid.(tmp_allFields{nn}) = (norm(rec_funDep_A00.(tmp_allFields{1})(:) - rec_funDep_A00.(tmp_allFields{nn})(:))^2)/length(rec_funDep_A00.(tmp_allFields{1})(:));
-    if 0
-        rec_funDep_A00_ErrMonday.(tmp_allFields{nn}) = rec_funDep_A00.(tmp_allFields{1}) - rec_funDep_A00.(tmp_allFields{nn});
-        rec_funDep_A00_ErrMonday.(tmp_allFields{nn}) = abs(rec_funDep_A00_ErrMonday.(tmp_allFields{nn}));
-        rec_funDep_A00_ErrMonday.(tmp_allFields{nn}) = max(rec_funDep_A00_ErrMonday.(tmp_allFields{nn}),[],3);
-        rec_funDep_A00_ErrMonday.(tmp_allFields{nn}) = mean(mean(rec_funDep_A00_ErrMonday.(tmp_allFields{nn})));
-    end
-end
+      clearvars ii jj kk nn tmp* rec_funDep_A00_ErrMonday rec_funDep_A00_ErrEuclid
+      tmp_allFields  = fieldnames(rec_sig);
+
+      for nn = 1:length(tmp_allFields)
+          rec_funDep_A00_ErrEuclid.(tmp_allFields{nn}) = (norm(rec_funDep_A00.(tmp_allFields{1}) - rec_funDep_A00.(tmp_allFields{nn}),'fro')^2);
+      end
 
      #+END_SRC
 
@@ -2680,12 +2704,17 @@ end
     #+NAME: ./tg_s06_Error_evaluation.m
     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s06_Error_evaluation.m :results silent
 
-clearvars ii jj kk nn tmp* rec_funDep_A00_ErrCorrCf
-tmp_allFields  = fieldnames(rec_sig);
-for nn = 1:length(tmp_allFields)
-    rec_funDep_A00_ErrCorrCf.(tmp_allFields{nn}) = corrcoef(rec_funDep_A00.(tmp_allFields{1})(:),rec_funDep_A00.(tmp_allFields{nn})(:));
-    rec_funDep_A00_ErrCorrCf.(tmp_allFields{nn}) = rec_funDep_A00_ErrCorrCf.(tmp_allFields{nn})(1,end);
-end
+      clearvars ii jj kk nn tmp* rec_funDep_A00_ErrCorrCf
+      tmp_allFields  = fieldnames(rec_sig);
+
+      for nn = 1:length(tmp_allFields)
+          tmp_error = zeros(sum(SETUP.SRCS(:,1)),1);
+          for kk = 1:sum(SETUP.SRCS(:,1))
+              tmp_x=corrcoef(rec_funDep_A00.(tmp_allFields{1})(kk,:),rec_funDep_A00.(tmp_allFields{nn})(kk,:));
+              tmp_error(kk)=tmp_x(1,end);
+          end
+          rec_funDep_A00_ErrCorrCf.(tmp_allFields{nn}) = mean(tmp_error);
+      end
 
     #+END_SRC
 
@@ -2694,11 +2723,16 @@ end
     #+NAME: ./tg_s06_Error_evaluation.m
     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s06_Error_evaluation.m :results silent
 
-clearvars ii jj kk nn tmp* rec_funDep_PDC_err rec_funDep_PDC_ErrEuclid
-tmp_allFields  = fieldnames(rec_sig);
-for nn = 1:length(tmp_allFields)
-    rec_funDep_PDC_ErrEuclid.(tmp_allFields{nn}) = (norm(rec_funDep_PDC.(tmp_allFields{1})(:) - rec_funDep_PDC.(tmp_allFields{nn})(:))^2)/length(rec_funDep_PDC.(tmp_allFields{1})(:));
-end
+      clearvars ii jj kk nn tmp* rec_funDep_PDC_err rec_funDep_PDC_ErrEuclid
+      tmp_allFields  = fieldnames(rec_sig);
+
+      for nn = 1:length(tmp_allFields)
+          tmp_error = zeros(length(SETUP.PDC_RES),1);
+          for ii = 1:length(SETUP.PDC_RES)
+              tmp_error(ii) = norm(rec_funDep_PDC.(tmp_allFields{1})(:,:,ii) - rec_funDep_PDC.(tmp_allFields{nn})(:,:,ii),'fro')^2;
+          end
+          rec_funDep_PDC_ErrEuclid.(tmp_allFields{nn}) = mean(tmp_error);
+      end
 
     #+END_SRC
 
@@ -2707,12 +2741,17 @@ end
     #+NAME: ./tg_s06_Error_evaluation.m
     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s06_Error_evaluation.m :results silent
 
-clearvars ii jj kk nn tmp*  rec_funDep_PDC_ErrCorrCf
-tmp_allFields  = fieldnames(rec_sig);
-for nn = 1:length(tmp_allFields)
-    rec_funDep_PDC_ErrCorrCf.(tmp_allFields{nn}) = corrcoef(rec_funDep_PDC.(tmp_allFields{1})(:),rec_funDep_PDC.(tmp_allFields{nn})(:));
-    rec_funDep_PDC_ErrCorrCf.(tmp_allFields{nn}) = rec_funDep_PDC_ErrCorrCf.(tmp_allFields{nn})(1,end);
-end
+      clearvars ii jj kk nn tmp*  rec_funDep_PDC_ErrCorrCf
+      tmp_allFields  = fieldnames(rec_sig);
+
+      for nn = 1:length(tmp_allFields)
+          tmp_error = zeros(length(SETUP.PDC_RES),1);
+          for ii = 1:length(SETUP.PDC_RES)
+              tmp_x=corrcoef(rec_funDep_PDC.(tmp_allFields{1})(:,:,ii),rec_funDep_PDC.(tmp_allFields{nn})(:,:,ii));
+              tmp_error(ii)=tmp_x(1,end);
+          end
+          rec_funDep_PDC_ErrCorrCf.(tmp_allFields{nn}) = mean(tmp_error);
+      end
 
     #+END_SRC
 
@@ -2906,7 +2945,7 @@ rec_funDep_PDC_ErrMonday
 for nn = 1:length(tmp_allFields)
     figure(40000+nn);clf;
     set(gcf, 'Position', SETUP.DISP);
-    rawPlotPDC(rec_funDep_PDC.(tmp_allFields{nn}),tmp_accf)
+    rawPlotPDC(rec_funDep_PDC.(tmp_allFields{nn}),SETUP.PDC_RES)
     title(tmp_allFields{nn})
 end
 
@@ -3069,12 +3108,12 @@ SETUP.DEEP   = [             0 0 20 ]; % deep sources
 
 SETUP.ERPs   = 0;       % Add ERPs (timelocked activity)
 
-SETUP.rROI   = 1;       % random (1) or predefined (0) ROIs
+SETUP.rROI   = 0;       % random (1) or predefined (0) ROIs
 
 
 % Basic setting s for sources and noise.
 SETUP.n00    = 500;     % number of time samples per trial
-SETUP.K00    = 50;      % number of independent realizations of signal and noise based on generated MVAR model
+SETUP.K00    = 2;      % number of independent realizations of signal and noise based on generated MVAR model
 SETUP.P00    = 6;       % order of the MVAR model used to generate time-courses for signal of interest
 SETUP.FRAC   = 0.20;    % proportion of ones to zeros in off-diagonal elements of the MVAR coefficients masking array
 SETUP.STAB   = 0.99;    % MVAR stability limit for MVAR eigenvalues (less than 1.0 results in more stable model producing more stationary signals)
@@ -3083,11 +3122,11 @@ SETUP.RNG    = [0,2.8]; % range for pseudo-random sampling of eigenvalues for MV
 % Settings controlling how informative the code execution should be.
 % By default most of the output text, plot, checkup and other features is turned off for the batch simulations!!!
 SETUP.ITER   = 5e5;     % iterations limit for MVAR pseudo-random sampling and stability verification
+SETUP.PDC_RES = [0:0.01:0.5]; % resolution vector for normalized PDC estimation
 SETUP.TELL   = 0;       % provide additional comments during code execution ("tell me more")
 SETUP.PLOT   = 0;       % plot figures during the intermediate stages
 SETUP.SCRN   = get(0,'MonitorPositions'); % get screens positions
 SETUP.DISP   = SETUP.SCRN(end,:);        % force figures to be displayed on (3dr) screenscreen
-
 
 % Settings for seed selection
 tmp_shoudSeedBeFixed = 0;
@@ -3096,7 +3135,7 @@ clearvars ii jj kk nn tmp*
 
 % OK
 SETUP.RANK_EIG = sum(SETUP.SRCS(:,1)); % rank of EIG-LCMV filter: set to number of active sources
-SETUP.fltREMOVE = 0; %to keep (0) or remove (1) selected filters
+SETUP.fltREMOVE = 1; %to keep (0) or remove (1) selected filters
 SETUP.IntLfgRANK = round(0.3*sum(SETUP.SRCS(:,2))); % rank of patch-constrained reduced-rank leadfield
 
 % Leadfields perturbation settings.
@@ -3185,103 +3224,78 @@ run('./tg_s06_Error_evaluation.m')
    #+NAME: ./tg_s08_LOOP___00_RUN.m
    #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s08_LOOP___00_RUN.m :results silent
 
-if exist('fPath'), cd(fPath); else, try, cd('~/supFunSim/'); catch, warningMessage = 'Problem encoutered while trying to change working directory to ''~/supFunSim/''.'; uiwait(msgbox(warningMessage)); warning(warningMessage); end; end; disp(['CYBERCRAFT:: pwd is: ',pwd])
+     if exist('fPath'), cd(fPath); else, try, cd('~/supFunSim/'); catch, warningMessage = 'Problem encoutered while trying to change working directory to ''~/supFunSim/''.'; uiwait(msgbox(warningMessage)); warning(warningMessage); end; end; disp(['CYBERCRAFT:: pwd is: ',pwd])
 
-clearvars ii jj kk nn tmp* LOOP* Loop*;
-run('./tg_s07_BATCH___01_Prelude.m');
-SETUP
+     clearvars ii jj kk nn tmp* LOOP* Loop*;
+     run('./tg_s07_BATCH___01_Prelude.m');
+     SETUP
 
-% Get some details for simulation output filename (*.mat file)
-LOOP.DATE = datestr(now,'yyyymmdd_HHMMSS');
-LOOP.NAME = tempname; [~, LOOP.NAME] = fileparts(LOOP.NAME); % simulation unique name
+     % Get some details for simulation output filename (*.mat file)
+     LOOP.DATE = datestr(now,'yyyymmdd_HHMMSS');
+     LOOP.NAME = tempname; [~, LOOP.NAME] = fileparts(LOOP.NAME); % simulation unique name
 
-% Number of simulation runs for each SNRs combination
-LOOP.totSimCount = 1;
-LOOP.rngSimCount = 1:LOOP.totSimCount;
+     % Number of simulation runs for each SNRs combination
+     LOOP.totSimCount = 2;
+     LOOP.rngSimCount = 1:LOOP.totSimCount;
 
-% Range of SNRs (defaults are consequently [20], [0] and [0,10,20])
-LOOP.rngMesNoise = 10;
-LOOP.rngBcgNoise = 0;
-LOOP.rngIntNoise = [0:5:20];
+     % Range of SNRs (defaults are consequently [20], [0] and [0,10,20])
+     LOOP.rngMesNoise = 10;
+     LOOP.rngBcgNoise = 0;
+     LOOP.rngIntNoise = [0:10:20];
 
-LOOP
-SETUP
+     LOOP
+     SETUP
 
-run('./tg_s08_LOOP___01_Main_LOOP.m'); whos
+     run('./tg_s08_LOOP___01_Main_LOOP.m'); whos
 
-LOOP
-LOOP.table_varN'
-LOOP.table_rowN
-size(LOOP.table_arrC)
+     LOOP
+     LOOP.table_varN'
+     LOOP.table_rowN
+     size(LOOP.table_arrC)
 
-LOOP.table_arrC_avgSimCount = squeeze(mean(LOOP.table_arrC   ,3))
-LOOP.table_arrC_stdSimCount = squeeze( std(LOOP.table_arrC,[],3))
-size(LOOP.table_arrC_avgSimCount)
+     LOOP.table_arrC_avgSimCount = squeeze(mean(LOOP.table_arrC,3))
+     LOOP.table_arrC_stdSimCount = squeeze(std(LOOP.table_arrC,[],3))
+     size(LOOP.table_arrC_avgSimCount)
 
-% PLOT THE RESULTS
-if 1
-    mySave = ['./res___',LOOP.DATE,'___',LOOP.NAME,'___',datestr(now,'yyyymmdd_HHMMSS')];
-    save(mySave)
-    LOOP
-    % remove dome filters from plot (for good)
-    myRem = not(ismember(LOOP.table_rowN,{'ZF','Dummy','ZEROS'}))
-    LOOP.table_rowN = LOOP.table_rowN(myRem,:)
-    LOOP.table_arrC_avgSimCount = LOOP.table_arrC_avgSimCount(myRem,:,:)
-    LOOP.table_arrC_stdSimCount = LOOP.table_arrC_stdSimCount(myRem,:,:)
-    LOOP.table_arrC = LOOP.table_arrC(myRem,:,:,:,:,:)
+     % PLOT THE RESULTS
+     mySave = ['./res___',LOOP.DATE,'___',LOOP.NAME,'___',datestr(now,'yyyymmdd_HHMMSS')];
+     save(mySave)
+     LOOP
 
-end
+     close all
+     for ii = 1:length(LOOP.table_varN)
+         LOOP.table_varN'
+         tmp_pickVar = ii;
+         disp(LOOP.table_varN(tmp_pickVar))
 
-close all
-for ii = 1:length(LOOP.table_varN)
-    LOOP.table_varN'
-    tmp_pickVar = ii;
-    disp(LOOP.table_varN(tmp_pickVar))
+         TMP_res.table_arrC = squeeze(LOOP.table_arrC_avgSimCount(:,tmp_pickVar,:))
+         TMP_res.table_varN = strrep(strrep(strsplit(num2str(LOOP.(LOOP.NamNoise),'%+d ')),'-','n'),'+','p')
+         TMP_res.table_rowN = LOOP.table_rowN
+         TMP_res.table = array2table(TMP_res.table_arrC,'VariableNames',TMP_res.table_varN,'RowNames',TMP_res.table_rowN);
+         sortrows(TMP_res.table,1)
 
-    TMP_res.table_arrC = squeeze(LOOP.table_arrC_avgSimCount(:,tmp_pickVar,:))
-    TMP_res.table_varN = strrep(strrep(strsplit(num2str(LOOP.(LOOP.NamNoise),'%+d ')),'-','n'),'+','p')
-    TMP_res.table_rowN = LOOP.table_rowN
-    TMP_res.table = array2table(TMP_res.table_arrC,'VariableNames',TMP_res.table_varN,'RowNames',TMP_res.table_rowN);
-    sortrows(TMP_res.table,1)
+         figure('Name',[LOOP.table_varN{tmp_pickVar},' for ',LOOP.NamNoise,' in ',num2str(LOOP.(LOOP.NamNoise),'%+d ')])
+         bar(TMP_res.table_arrC)
+         set(gca, 'XTick', 1:length(TMP_res.table_rowN), 'XTickLabel', strrep(TMP_res.table_rowN,'_','\_'));
+         h1 = legend(strsplit(num2str(LOOP.(LOOP.NamNoise),'%+d ')))
+         myTitle = strrep([LOOP.table_varN{tmp_pickVar},' for ',LOOP.NamNoise,' in ',num2str(LOOP.(LOOP.NamNoise),'%+d ')],'_','\_');
+         % title(myTitle)
+         myName = ['./fig/',LOOP.DATE,'___',LOOP.NAME,'___fig_',num2str(ii),'___',strrep(strrep(myTitle,'\',''),' ','_')];
 
-    figure('Name',[LOOP.table_varN{tmp_pickVar},' for ',LOOP.NamNoise,' in ',num2str(LOOP.(LOOP.NamNoise),'%+d ')])
-    bar(TMP_res.table_arrC)
-    set(gca, 'XTick', 1:length(TMP_res.table_rowN), 'XTickLabel', strrep(TMP_res.table_rowN,'_','\_'));
-    h1 = legend(strsplit(num2str(LOOP.(LOOP.NamNoise),'%+d ')))
-    myTitle = strrep([LOOP.table_varN{tmp_pickVar},' for ',LOOP.NamNoise,' in ',num2str(LOOP.(LOOP.NamNoise),'%+d ')],'_','\_');
-    % title(myTitle)
-    myName = ['./fig/',LOOP.DATE,'___',LOOP.NAME,'___fig_',num2str(ii),'___',strrep(strrep(myTitle,'\',''),' ','_')];
+         v1 = get(h1,'title')
+         set(v1,'string','SINR')
 
-    v1 = get(h1,'title')
-    set(v1,'string','SINR')
+         set(gcf, 'PaperUnits', 'centimeters')
+         set(gcf, 'PaperOrientation', 'portrait')
+         set(gcf, 'PaperSize', [20, 20])
+         set(gcf, 'Position', [100, 100, 800, 750])
+         legend('Location','northeastoutside')
+         xtickangle(45)
 
-    set(gcf, 'PaperUnits', 'centimeters')
-    set(gcf, 'PaperOrientation', 'portrait')
-    set(gcf, 'PaperSize', [20, 20])
-    set(gcf, 'Position', [100, 100, 800, 750])
-    legend('Location','northeastoutside')
-    xtickangle(45)
-
-    savefig(gcf,myName,'compact')
-    savefig(gcf,myName)
-    saveas(gcf,myName,'pdf')
-end
-
-if 0
-
-ii = 0
-myName = ['./fig/',LOOP.DATE,'___',LOOP.NAME,'___fig_',num2str(ii),'___','overview']
-legend(gca,'off');
-cbh = findobj( 0, 'tag', 'Colorbar' ), % and
-delete( cbh )
-
-set(gca,'YScale','log')
-set(gca,'YScale','linear')
-
-end
-
-% Fig: 1, 2, 5, 6
-% Tylko
+         savefig(gcf,myName,'compact')
+         savefig(gcf,myName)
+         saveas(gcf,myName,'pdf')
+     end
 
    #+END_SRC
 
@@ -3325,7 +3339,7 @@ for LoopSimCount = 1:LOOP.totSimCount
                 LOOP.progress   = [LOOP.progress;LoopSimCount,LOOP.rngMesNoise(LoopMesNoise),LOOP.rngBcgNoise(LoopBcgNoise),LOOP.rngIntNoise(LoopIntNoise)];
                 fprintf('\n');
                 disp('============================')
-                disp(['CurrIter: ',num2str(size(LOOP.progress,1)),' of ',num2str(length(LOOP.coords))])
+                disp(['CurrIter: ',num2str(size(LOOP.progress,1)),' of ',num2str(size(LOOP.coords,1))])
                 disp('----------------------------')
                 disp(['SimCount: ',num2str(LoopSimCount),' of ',num2str(LOOP.totSimCount)])
                 disp(['MesNoise: ',num2str(LoopMesNoise),' of ',num2str(length(LOOP.rngMesNoise)),' (',num2str(LOOP.rngMesNoise(LoopMesNoise)),' dB in ' ,'[ ',num2str(LOOP.rngMesNoise),' ])'])

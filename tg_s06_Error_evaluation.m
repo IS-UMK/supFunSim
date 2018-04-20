@@ -1,47 +1,82 @@
 
+clearvars ii jj kk nn tmp* 
+     tmp_allFields  = fieldnames(rec_sig);
+
+     for nn = 1:length(tmp_allFields)
+         for ii = 1:SETUP.n00
+             for jj = 1:SETUP.K00
+rec_sig.(tmp_allFields{nn})(ii,:,jj)=rec_sig.(tmp_allFields{nn})(ii,:,jj)/norm(rec_sig.(tmp_allFields{nn})(ii,:,jj));
+             end
+         end
+     end
+
 clearvars ii jj kk nn tmp* rec_sigAmp_ErrEuclid
 tmp_allFields  = fieldnames(rec_sig);
-for nn = 1:length(tmp_allFields),
-    rec_sigAmp_ErrEuclid.(tmp_allFields{nn}) = (norm(rec_sig.(tmp_allFields{1})(:) - rec_sig.(tmp_allFields{nn})(:))^2)/length(rec_sig.(tmp_allFields{1})(:));
+
+for nn = 1:length(tmp_allFields)
+    tmp_error = zeros(SETUP.n00,SETUP.K00);
+    for ii = 1:SETUP.n00
+        for jj = 1:SETUP.K00
+            tmp_error(ii,jj)=norm(rec_sig.(tmp_allFields{1})(ii,:,jj)-rec_sig.(tmp_allFields{nn})(ii,:,jj))^2;                  
+        end
+    end
+    rec_sigAmp_ErrEuclid.(tmp_allFields{nn})=mean(mean(tmp_error));
 end
 
 clearvars ii jj kk nn tmp* rec_sigAmp_ErrCorrCf
 tmp_allFields  = fieldnames(rec_sig);
-for nn = 1:length(tmp_allFields),
-    rec_sigAmp_ErrCorrCf.(tmp_allFields{nn}) = corrcoef(rec_sig.(tmp_allFields{1})(:),rec_sig.(tmp_allFields{nn})(:));
-    rec_sigAmp_ErrCorrCf.(tmp_allFields{nn}) = rec_sigAmp_ErrCorrCf.(tmp_allFields{nn})(1,end);
+
+for nn = 1:length(tmp_allFields)
+    tmp_error = zeros(sum(SETUP.SRCS(:,1)),SETUP.K00);
+    for kk = 1:sum(SETUP.SRCS(:,1))
+        for jj = 1:SETUP.K00
+            tmp_x=corrcoef(rec_sig.(tmp_allFields{1})(:,kk,jj),rec_sig.(tmp_allFields{nn})(:,kk,jj));
+            tmp_error(kk,jj)=tmp_x(1,end);
+        end
+    end
+    rec_sigAmp_ErrCorrCf.(tmp_allFields{nn}) = mean(mean(tmp_error));
 end
 
 clearvars ii jj kk nn tmp* rec_funDep_A00_ErrMonday rec_funDep_A00_ErrEuclid
 tmp_allFields  = fieldnames(rec_sig);
+
 for nn = 1:length(tmp_allFields)
-    rec_funDep_A00_ErrEuclid.(tmp_allFields{nn}) = (norm(rec_funDep_A00.(tmp_allFields{1})(:) - rec_funDep_A00.(tmp_allFields{nn})(:))^2)/length(rec_funDep_A00.(tmp_allFields{1})(:));
-    if 0
-        rec_funDep_A00_ErrMonday.(tmp_allFields{nn}) = rec_funDep_A00.(tmp_allFields{1}) - rec_funDep_A00.(tmp_allFields{nn});
-        rec_funDep_A00_ErrMonday.(tmp_allFields{nn}) = abs(rec_funDep_A00_ErrMonday.(tmp_allFields{nn}));
-        rec_funDep_A00_ErrMonday.(tmp_allFields{nn}) = max(rec_funDep_A00_ErrMonday.(tmp_allFields{nn}),[],3);
-        rec_funDep_A00_ErrMonday.(tmp_allFields{nn}) = mean(mean(rec_funDep_A00_ErrMonday.(tmp_allFields{nn})));
-    end
+    rec_funDep_A00_ErrEuclid.(tmp_allFields{nn}) = (norm(rec_funDep_A00.(tmp_allFields{1}) - rec_funDep_A00.(tmp_allFields{nn}),'fro')^2);
 end
 
 clearvars ii jj kk nn tmp* rec_funDep_A00_ErrCorrCf
 tmp_allFields  = fieldnames(rec_sig);
+
 for nn = 1:length(tmp_allFields)
-    rec_funDep_A00_ErrCorrCf.(tmp_allFields{nn}) = corrcoef(rec_funDep_A00.(tmp_allFields{1})(:),rec_funDep_A00.(tmp_allFields{nn})(:));
-    rec_funDep_A00_ErrCorrCf.(tmp_allFields{nn}) = rec_funDep_A00_ErrCorrCf.(tmp_allFields{nn})(1,end);
+    tmp_error = zeros(sum(SETUP.SRCS(:,1)),1);
+    for kk = 1:sum(SETUP.SRCS(:,1))
+        tmp_x=corrcoef(rec_funDep_A00.(tmp_allFields{1})(kk,:),rec_funDep_A00.(tmp_allFields{nn})(kk,:));
+        tmp_error(kk)=tmp_x(1,end);
+    end
+    rec_funDep_A00_ErrCorrCf.(tmp_allFields{nn}) = mean(tmp_error);
 end
 
 clearvars ii jj kk nn tmp* rec_funDep_PDC_err rec_funDep_PDC_ErrEuclid
 tmp_allFields  = fieldnames(rec_sig);
+
 for nn = 1:length(tmp_allFields)
-    rec_funDep_PDC_ErrEuclid.(tmp_allFields{nn}) = (norm(rec_funDep_PDC.(tmp_allFields{1})(:) - rec_funDep_PDC.(tmp_allFields{nn})(:))^2)/length(rec_funDep_PDC.(tmp_allFields{1})(:));
+    tmp_error = zeros(length(SETUP.PDC_RES),1);
+    for ii = 1:length(SETUP.PDC_RES)
+        tmp_error(ii) = norm(rec_funDep_PDC.(tmp_allFields{1})(:,:,ii) - rec_funDep_PDC.(tmp_allFields{nn})(:,:,ii),'fro')^2;
+    end
+    rec_funDep_PDC_ErrEuclid.(tmp_allFields{nn}) = mean(tmp_error);
 end
 
 clearvars ii jj kk nn tmp*  rec_funDep_PDC_ErrCorrCf
 tmp_allFields  = fieldnames(rec_sig);
+
 for nn = 1:length(tmp_allFields)
-    rec_funDep_PDC_ErrCorrCf.(tmp_allFields{nn}) = corrcoef(rec_funDep_PDC.(tmp_allFields{1})(:),rec_funDep_PDC.(tmp_allFields{nn})(:));
-    rec_funDep_PDC_ErrCorrCf.(tmp_allFields{nn}) = rec_funDep_PDC_ErrCorrCf.(tmp_allFields{nn})(1,end);
+    tmp_error = zeros(length(SETUP.PDC_RES),1);
+    for ii = 1:length(SETUP.PDC_RES)
+        tmp_x=corrcoef(rec_funDep_PDC.(tmp_allFields{1})(:,:,ii),rec_funDep_PDC.(tmp_allFields{nn})(:,:,ii));
+        tmp_error(ii)=tmp_x(1,end);
+    end
+    rec_funDep_PDC_ErrCorrCf.(tmp_allFields{nn}) = mean(tmp_error)'
 end
 
 clearvars ii jj kk nn tmp* rec*vec

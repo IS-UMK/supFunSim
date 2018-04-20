@@ -55,6 +55,7 @@ SETUP.FRAC   = 0.20;    % proportion of ones to zeros in off-diagonal elements o
 SETUP.STAB   = 0.99;    % MVAR stability limit for MVAR eigenvalues (less than 1.0 results in more stable model producing more stationary signals)
 SETUP.RNG    = [0,2.8]; % range for pseudo-random sampling of eigenvalues for MVAR coefficients range
 SETUP.ITER   = 5e5;     % iterations limit for MVAR pseudo-random sampling and stability verification
+SETUP.PDC_RES = [0:0.01:0.5]; % resolution vector for normalized PDC estimation
 SETUP.TELL   = 1;       % provide additional comments during code execution ("tell me more")
 SETUP.PLOT   = 1;       % plot figures during the intermediate stages
 SETUP.SCRN   = get(0,'MonitorPositions'); % get screens positions

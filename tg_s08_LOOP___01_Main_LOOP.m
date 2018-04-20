@@ -34,7 +34,7 @@ for LoopSimCount = 1:LOOP.totSimCount
                 LOOP.progress   = [LOOP.progress;LoopSimCount,LOOP.rngMesNoise(LoopMesNoise),LOOP.rngBcgNoise(LoopBcgNoise),LOOP.rngIntNoise(LoopIntNoise)];
                 fprintf('\n');
                 disp('============================')
-                disp(['CurrIter: ',num2str(size(LOOP.progress,1)),' of ',num2str(length(LOOP.coords))])
+                disp(['CurrIter: ',num2str(size(LOOP.progress,1)),' of ',num2str(size(LOOP.coords,1))])
                 disp('----------------------------')
                 disp(['SimCount: ',num2str(LoopSimCount),' of ',num2str(LOOP.totSimCount)])
                 disp(['MesNoise: ',num2str(LoopMesNoise),' of ',num2str(length(LOOP.rngMesNoise)),' (',num2str(LOOP.rngMesNoise(LoopMesNoise)),' dB in ' ,'[ ',num2str(LOOP.rngMesNoise),' ])'])
