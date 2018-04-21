@@ -2727,11 +2727,13 @@ size(sim_sig_AdjSNRs.SrcActivPre)
       tmp_allFields  = fieldnames(rec_sig);
 
       for nn = 1:length(tmp_allFields)
-          tmp_error = zeros(length(SETUP.PDC_RES),1);
-          for ii = 1:length(SETUP.PDC_RES)
-              tmp_error(ii) = norm(rec_funDep_PDC.(tmp_allFields{1})(:,:,ii) - rec_funDep_PDC.(tmp_allFields{nn})(:,:,ii),'fro')^2;
+          tmp_error = zeros(sum(SETUP.SRCS(:,1)),sum(SETUP.SRCS(:,1)));
+          for ii = 1:sum(SETUP.SRCS(:,1))
+              for jj = 1:sum(SETUP.SRCS(:,1))
+                  tmp_error(ii,jj) = norm(rec_funDep_PDC.(tmp_allFields{1})(ii,jj,:) - rec_funDep_PDC.(tmp_allFields{nn})(ii,jj,:),'fro')^2;
+              end
           end
-          rec_funDep_PDC_ErrEuclid.(tmp_allFields{nn}) = mean(tmp_error);
+          rec_funDep_PDC_ErrEuclid.(tmp_allFields{nn}) = mean(mean(tmp_error));
       end
 
     #+END_SRC
@@ -2745,12 +2747,14 @@ size(sim_sig_AdjSNRs.SrcActivPre)
       tmp_allFields  = fieldnames(rec_sig);
 
       for nn = 1:length(tmp_allFields)
-          tmp_error = zeros(length(SETUP.PDC_RES),1);
-          for ii = 1:length(SETUP.PDC_RES)
-              tmp_x=corrcoef(rec_funDep_PDC.(tmp_allFields{1})(:,:,ii),rec_funDep_PDC.(tmp_allFields{nn})(:,:,ii));
-              tmp_error(ii)=tmp_x(1,end);
+          tmp_error = zeros(sum(SETUP.SRCS(:,1)),sum(SETUP.SRCS(:,1)));
+          for ii = 1:sum(SETUP.SRCS(:,1))
+              for jj = 1:sum(SETUP.SRCS(:,1))
+                  tmp_x=corrcoef(rec_funDep_PDC.(tmp_allFields{1})(ii,jj,:),rec_funDep_PDC.(tmp_allFields{nn})(ii,jj,:));
+                  tmp_error(ii,jj)=tmp_x(1,end);
+              end
           end
-          rec_funDep_PDC_ErrCorrCf.(tmp_allFields{nn}) = mean(tmp_error);
+          rec_funDep_PDC_ErrCorrCf.(tmp_allFields{nn}) = mean(mean(tmp_error));
       end
 
     #+END_SRC

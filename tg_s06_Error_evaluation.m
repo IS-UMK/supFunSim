@@ -76,7 +76,7 @@ for nn = 1:length(tmp_allFields)
         tmp_x=corrcoef(rec_funDep_PDC.(tmp_allFields{1})(:,:,ii),rec_funDep_PDC.(tmp_allFields{nn})(:,:,ii));
         tmp_error(ii)=tmp_x(1,end);
     end
-    rec_funDep_PDC_ErrCorrCf.(tmp_allFields{nn}) = mean(tmp_error)'
+    rec_funDep_PDC_ErrCorrCf.(tmp_allFields{nn}) = mean(tmp_error);
 end
 
 clearvars ii jj kk nn tmp* rec*vec
