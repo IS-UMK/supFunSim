@@ -60,9 +60,9 @@ clearvars ii jj kk nn tmp* rec_funDep_PDC_err rec_funDep_PDC_ErrEuclid
 tmp_allFields  = fieldnames(rec_sig);
 
 for nn = 1:length(tmp_allFields)
-    tmp_error = zeros(length(SETUP.PDC_RES),1);
-    for ii = 1:length(SETUP.PDC_RES)
-        tmp_error(ii) = norm(rec_funDep_PDC.(tmp_allFields{1})(:,:,ii) - rec_funDep_PDC.(tmp_allFields{nn})(:,:,ii),'fro')^2;
+    tmp_error = zeros(sum(SETUP.SRCS(:,1)),1);
+    for ii = 1:sum(SETUP.SRCS(:,1))
+        tmp_error(ii) = norm(squeeze(rec_funDep_PDC.(tmp_allFields{1})(ii,:,:)) - squeeze(rec_funDep_PDC.(tmp_allFields{nn})(ii,:,:)),'fro')^2;
     end
     rec_funDep_PDC_ErrEuclid.(tmp_allFields{nn}) = mean(tmp_error);
 end
@@ -71,9 +71,9 @@ clearvars ii jj kk nn tmp*  rec_funDep_PDC_ErrCorrCf
 tmp_allFields  = fieldnames(rec_sig);
 
 for nn = 1:length(tmp_allFields)
-    tmp_error = zeros(length(SETUP.PDC_RES),1);
-    for ii = 1:length(SETUP.PDC_RES)
-        tmp_x=corrcoef(rec_funDep_PDC.(tmp_allFields{1})(:,:,ii),rec_funDep_PDC.(tmp_allFields{nn})(:,:,ii));
+    tmp_error = zeros(sum(SETUP.SRCS(:,1)),1);
+    for ii = 1:sum(SETUP.SRCS(:,1))
+        tmp_x=corrcoef(reshape(squeeze(rec_funDep_PDC.(tmp_allFields{1})(ii,:,:)),[],1),reshape(squeeze(rec_funDep_PDC.(tmp_allFields{nn})(ii,:,:)),[],1));
         tmp_error(ii)=tmp_x(1,end);
     end
     rec_funDep_PDC_ErrCorrCf.(tmp_allFields{nn}) = mean(tmp_error);

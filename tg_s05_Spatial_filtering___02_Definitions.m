@@ -33,9 +33,6 @@ if(SETUP.fltREMOVE)
     rec_flt = rmfield(rec_flt,'ZF');
     rec_flt = rmfield(rec_flt,'RANDN');
     rec_flt = rmfield(rec_flt,'ZEROS');
-    rec_flt = rmfield(rec_flt,'LCMV_N');
-    rec_flt = rmfield(rec_flt,'EIG_LCMV_N');
-    rec_flt = rmfield(rec_flt,'sMVP_N');
 end
 
 rawFixStrJoin

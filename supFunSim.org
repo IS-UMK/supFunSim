@@ -2478,9 +2478,6 @@ if(SETUP.fltREMOVE)
     rec_flt = rmfield(rec_flt,'ZF');
     rec_flt = rmfield(rec_flt,'RANDN');
     rec_flt = rmfield(rec_flt,'ZEROS');
-    rec_flt = rmfield(rec_flt,'LCMV_N');
-    rec_flt = rmfield(rec_flt,'EIG_LCMV_N');
-    rec_flt = rmfield(rec_flt,'sMVP_N');
 end
 
        #+END_SRC
@@ -2727,13 +2724,11 @@ size(sim_sig_AdjSNRs.SrcActivPre)
       tmp_allFields  = fieldnames(rec_sig);
 
       for nn = 1:length(tmp_allFields)
-          tmp_error = zeros(sum(SETUP.SRCS(:,1)),sum(SETUP.SRCS(:,1)));
+          tmp_error = zeros(sum(SETUP.SRCS(:,1)),1);
           for ii = 1:sum(SETUP.SRCS(:,1))
-              for jj = 1:sum(SETUP.SRCS(:,1))
-                  tmp_error(ii,jj) = norm(rec_funDep_PDC.(tmp_allFields{1})(ii,jj,:) - rec_funDep_PDC.(tmp_allFields{nn})(ii,jj,:),'fro')^2;
-              end
+              tmp_error(ii) = norm(squeeze(rec_funDep_PDC.(tmp_allFields{1})(ii,:,:)) - squeeze(rec_funDep_PDC.(tmp_allFields{nn})(ii,:,:)),'fro')^2;
           end
-          rec_funDep_PDC_ErrEuclid.(tmp_allFields{nn}) = mean(mean(tmp_error));
+          rec_funDep_PDC_ErrEuclid.(tmp_allFields{nn}) = mean(tmp_error);
       end
 
     #+END_SRC
@@ -2747,14 +2742,12 @@ size(sim_sig_AdjSNRs.SrcActivPre)
       tmp_allFields  = fieldnames(rec_sig);
 
       for nn = 1:length(tmp_allFields)
-          tmp_error = zeros(sum(SETUP.SRCS(:,1)),sum(SETUP.SRCS(:,1)));
+          tmp_error = zeros(sum(SETUP.SRCS(:,1)),1);
           for ii = 1:sum(SETUP.SRCS(:,1))
-              for jj = 1:sum(SETUP.SRCS(:,1))
-                  tmp_x=corrcoef(rec_funDep_PDC.(tmp_allFields{1})(ii,jj,:),rec_funDep_PDC.(tmp_allFields{nn})(ii,jj,:));
-                  tmp_error(ii,jj)=tmp_x(1,end);
-              end
+              tmp_x=corrcoef(reshape(squeeze(rec_funDep_PDC.(tmp_allFields{1})(ii,:,:)),[],1),reshape(squeeze(rec_funDep_PDC.(tmp_allFields{nn})(ii,:,:)),[],1));
+              tmp_error(ii)=tmp_x(1,end);
           end
-          rec_funDep_PDC_ErrCorrCf.(tmp_allFields{nn}) = mean(mean(tmp_error));
+          rec_funDep_PDC_ErrCorrCf.(tmp_allFields{nn}) = mean(tmp_error);
       end
 
     #+END_SRC
@@ -3127,7 +3120,7 @@ SETUP.RNG    = [0,2.8]; % range for pseudo-random sampling of eigenvalues for MV
 % By default most of the output text, plot, checkup and other features is turned off for the batch simulations!!!
 SETUP.ITER   = 5e5;     % iterations limit for MVAR pseudo-random sampling and stability verification
 SETUP.PDC_RES = [0:0.01:0.5]; % resolution vector for normalized PDC estimation
-SETUP.TELL   = 0;       % provide additional comments during code execution ("tell me more")
+SETUP.TELL   = 1;       % provide additional comments during code execution ("tell me more")
 SETUP.PLOT   = 0;       % plot figures during the intermediate stages
 SETUP.SCRN   = get(0,'MonitorPositions'); % get screens positions
 SETUP.DISP   = SETUP.SCRN(end,:);        % force figures to be displayed on (3dr) screenscreen

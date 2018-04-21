@@ -42,7 +42,7 @@ SETUP.RNG    = [0,2.8]; % range for pseudo-random sampling of eigenvalues for MV
 % By default most of the output text, plot, checkup and other features is turned off for the batch simulations!!!
 SETUP.ITER   = 5e5;     % iterations limit for MVAR pseudo-random sampling and stability verification
 SETUP.PDC_RES = [0:0.01:0.5]; % resolution vector for normalized PDC estimation
-SETUP.TELL   = 0;       % provide additional comments during code execution ("tell me more")
+SETUP.TELL   = 1;       % provide additional comments during code execution ("tell me more")
 SETUP.PLOT   = 0;       % plot figures during the intermediate stages
 SETUP.SCRN   = get(0,'MonitorPositions'); % get screens positions
 SETUP.DISP   = SETUP.SCRN(end,:);        % force figures to be displayed on (3dr) screenscreen
