@@ -277,6 +277,7 @@ SETUP.DISP   = SETUP.SCRN(end,:);        % force figures to be displayed on (3dr
 SETUP.SEED   = rng(round(1e3*randn()^2*sum(clock)));
 SETUP.RANK_EIG = sum(SETUP.SRCS(:,1)); % rank of EIG-LCMV filter: set to number of active sources
 SETUP.fltREMOVE = 1; %to keep (0) or remove (1) selected filters
+SETUP.SHOWori = 1; % to show (1) or do not show (0) Original and Dummy signals on Figures
 SETUP.IntLfgRANK = round(0.3*sum(SETUP.SRCS(:,2))); % rank of patch-constrained reduced-rank leadfield
 
     #+END_SRC
@@ -2478,6 +2479,13 @@ if(SETUP.fltREMOVE)
     rec_flt = rmfield(rec_flt,'ZF');
     rec_flt = rmfield(rec_flt,'RANDN');
     rec_flt = rmfield(rec_flt,'ZEROS');
+    rec_flt = rmfield(rec_flt,'MMSE');
+    rec_flt = rmfield(rec_flt,'EIG_LCMV_R');
+    rec_flt = rmfield(rec_flt,'EIG_LCMV_N');
+    rec_flt = rmfield(rec_flt,'sMVP_MSE');
+    rec_flt = rmfield(rec_flt,'sMVP_R');
+    rec_flt = rmfield(rec_flt,'sMVP_NL_MSE');
+    rec_flt = rmfield(rec_flt,'sMVP_NL_R');
 end
 
        #+END_SRC
@@ -3105,12 +3113,12 @@ SETUP.DEEP   = [             0 0 20 ]; % deep sources
 
 SETUP.ERPs   = 0;       % Add ERPs (timelocked activity)
 
-SETUP.rROI   = 0;       % random (1) or predefined (0) ROIs
+SETUP.rROI   = 1;       % random (1) or predefined (0) ROIs
 
 
 % Basic setting s for sources and noise.
 SETUP.n00    = 500;     % number of time samples per trial
-SETUP.K00    = 2;      % number of independent realizations of signal and noise based on generated MVAR model
+SETUP.K00    = 1;      % number of independent realizations of signal and noise based on generated MVAR model
 SETUP.P00    = 6;       % order of the MVAR model used to generate time-courses for signal of interest
 SETUP.FRAC   = 0.20;    % proportion of ones to zeros in off-diagonal elements of the MVAR coefficients masking array
 SETUP.STAB   = 0.99;    % MVAR stability limit for MVAR eigenvalues (less than 1.0 results in more stable model producing more stationary signals)
@@ -3120,7 +3128,7 @@ SETUP.RNG    = [0,2.8]; % range for pseudo-random sampling of eigenvalues for MV
 % By default most of the output text, plot, checkup and other features is turned off for the batch simulations!!!
 SETUP.ITER   = 5e5;     % iterations limit for MVAR pseudo-random sampling and stability verification
 SETUP.PDC_RES = [0:0.01:0.5]; % resolution vector for normalized PDC estimation
-SETUP.TELL   = 1;       % provide additional comments during code execution ("tell me more")
+SETUP.TELL   = 0;       % provide additional comments during code execution ("tell me more")
 SETUP.PLOT   = 0;       % plot figures during the intermediate stages
 SETUP.SCRN   = get(0,'MonitorPositions'); % get screens positions
 SETUP.DISP   = SETUP.SCRN(end,:);        % force figures to be displayed on (3dr) screenscreen
@@ -3133,13 +3141,14 @@ clearvars ii jj kk nn tmp*
 % OK
 SETUP.RANK_EIG = sum(SETUP.SRCS(:,1)); % rank of EIG-LCMV filter: set to number of active sources
 SETUP.fltREMOVE = 1; %to keep (0) or remove (1) selected filters
+SETUP.SHOWori = 0; % to show (1) or do not show (0) Original and Dummy signals on Figures
 SETUP.IntLfgRANK = round(0.3*sum(SETUP.SRCS(:,2))); % rank of patch-constrained reduced-rank leadfield
 
 % Leadfields perturbation settings.
 SETUP.CUBE           = 20;    % perturbation of the leadfields based on the shift of source position within a cube of given edge length (centered at the original leadfields positions)
 SETUP.CONE           = pi/32; % perturbation of the leadfields based on the rotation of source orientation (azimuth TH, elevation PHI)
-SETUP.H_Src_pert     = 1;     % use original (0) or perturbed (1) leadfield for signal reconstruction
-SETUP.H_Int_pert     = 1;     % use original (0) or perturbed (1) leadfield for nulling constrains
+SETUP.H_Src_pert     = 0;     % use original (0) or perturbed (1) leadfield for signal reconstruction
+SETUP.H_Int_pert     = 0;     % use original (0) or perturbed (1) leadfield for nulling constrains
 SETUP.SINR           = 0;     % signal to interference noise power ratio expressed in dB (both measured on electrode level)
 SETUP.SBNR           = 0;     % signal to biological noise power ratio expressed in dB (both measured on electrode level)
 SETUP.SMNR           = 20;    % signal to measurment noise power ratio expressed in dB (both measured on electrode level)
@@ -3238,7 +3247,7 @@ run('./tg_s06_Error_evaluation.m')
      % Range of SNRs (defaults are consequently [20], [0] and [0,10,20])
      LOOP.rngMesNoise = 10;
      LOOP.rngBcgNoise = 0;
-     LOOP.rngIntNoise = [0:10:20];
+     LOOP.rngIntNoise = [0:5:10];
 
      LOOP
      SETUP
@@ -3301,68 +3310,74 @@ run('./tg_s06_Error_evaluation.m')
    #+NAME: ./tg_s08_LOOP___01_Main_LOOP.m
    #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s08_LOOP___01_Main_LOOP.m :results silent
 
-[LOOP.c01RR,LOOP.c02MM,LOOP.c03BB,LOOP.c04II] = ndgrid(LOOP.rngSimCount,LOOP.rngMesNoise,LOOP.rngBcgNoise,LOOP.rngIntNoise);
-LOOP.coords = [LOOP.c01RR(:),LOOP.c02MM(:),LOOP.c03BB(:),LOOP.c04II(:)];
+     [LOOP.c01RR,LOOP.c02MM,LOOP.c03BB,LOOP.c04II] = ndgrid(LOOP.rngSimCount,LOOP.rngMesNoise,LOOP.rngBcgNoise,LOOP.rngIntNoise);
+     LOOP.coords = [LOOP.c01RR(:),LOOP.c02MM(:),LOOP.c03BB(:),LOOP.c04II(:)];
 
-2 == length(size(squeeze(double.empty([[length(LOOP.rngMesNoise),length(LOOP.rngBcgNoise),length(LOOP.rngIntNoise)],0]))))
-if 2 == length(size(squeeze(double.empty([[length(LOOP.rngMesNoise),length(LOOP.rngBcgNoise),length(LOOP.rngIntNoise)],0]))))
-    if max([length(LOOP.rngMesNoise),length(LOOP.rngBcgNoise),length(LOOP.rngIntNoise)]) == min([length(LOOP.rngMesNoise),length(LOOP.rngBcgNoise),length(LOOP.rngIntNoise)]),
-        LOOP.IdxNoise = 0;
-    else,
-        [~,LOOP.IdxNoise] = max([length(LOOP.rngMesNoise),length(LOOP.rngBcgNoise),length(LOOP.rngIntNoise)]);
-    end;
-    if LOOP.IdxNoise == 1,
-        LOOP.NamNoise = 'rngMesNoise';
-    elseif LOOP.IdxNoise == 2,
-        LOOP.NamNoise = 'rngBcgNoise';
-    elseif LOOP.IdxNoise == 3,
-        LOOP.NamNoise = 'rngIntNoise';
-    else,
-        LOOP.NamNoise = 'AnyNoise';
-    end;
-else,
-    error('CYBERCRAFT:: ensure that only one noise type is vector and the remaining are scalars');
-end;
-LOOP.iterations = []; LOOP.progress = []; LOOP.table_arrC = []; LOOP.table_varN = {}; LOOP.table_rowN = {};
+     2 == length(size(squeeze(double.empty([[length(LOOP.rngMesNoise),length(LOOP.rngBcgNoise),length(LOOP.rngIntNoise)],0]))))
+     if 2 == length(size(squeeze(double.empty([[length(LOOP.rngMesNoise),length(LOOP.rngBcgNoise),length(LOOP.rngIntNoise)],0]))))
+         if max([length(LOOP.rngMesNoise),length(LOOP.rngBcgNoise),length(LOOP.rngIntNoise)]) == min([length(LOOP.rngMesNoise),length(LOOP.rngBcgNoise),length(LOOP.rngIntNoise)]),
+             LOOP.IdxNoise = 0;
+         else,
+             [~,LOOP.IdxNoise] = max([length(LOOP.rngMesNoise),length(LOOP.rngBcgNoise),length(LOOP.rngIntNoise)]);
+         end;
+         if LOOP.IdxNoise == 1,
+             LOOP.NamNoise = 'rngMesNoise';
+         elseif LOOP.IdxNoise == 2,
+             LOOP.NamNoise = 'rngBcgNoise';
+         elseif LOOP.IdxNoise == 3,
+             LOOP.NamNoise = 'rngIntNoise';
+         else,
+             LOOP.NamNoise = 'AnyNoise';
+         end;
+     else,
+         error('CYBERCRAFT:: ensure that only one noise type is vector and the remaining are scalars');
+     end;
+     LOOP.iterations = []; LOOP.progress = []; LOOP.table_arrC = []; LOOP.table_varN = {}; LOOP.table_rowN = {};
 
-for LoopSimCount = 1:LOOP.totSimCount
-    run('./tg_s07_BATCH___02_Signals.m');
-    run('./tg_s07_BATCH___03_Leadfields.m');
-    for LoopIntNoise = 1:length(LOOP.rngIntNoise)
-        for LoopBcgNoise = 1:length(LOOP.rngBcgNoise)
-            for LoopMesNoise = 1:length(LOOP.rngMesNoise)
+     for LoopSimCount = 1:LOOP.totSimCount
+         run('./tg_s07_BATCH___02_Signals.m');
+         run('./tg_s07_BATCH___03_Leadfields.m');
+         for LoopIntNoise = 1:length(LOOP.rngIntNoise)
+             for LoopBcgNoise = 1:length(LOOP.rngBcgNoise)
+                 for LoopMesNoise = 1:length(LOOP.rngMesNoise)
 
-                LOOP.iterations = [LOOP.iterations;LoopSimCount,LoopMesNoise,LoopBcgNoise,LoopIntNoise];
-                LOOP.progress   = [LOOP.progress;LoopSimCount,LOOP.rngMesNoise(LoopMesNoise),LOOP.rngBcgNoise(LoopBcgNoise),LOOP.rngIntNoise(LoopIntNoise)];
-                fprintf('\n');
-                disp('============================')
-                disp(['CurrIter: ',num2str(size(LOOP.progress,1)),' of ',num2str(size(LOOP.coords,1))])
-                disp('----------------------------')
-                disp(['SimCount: ',num2str(LoopSimCount),' of ',num2str(LOOP.totSimCount)])
-                disp(['MesNoise: ',num2str(LoopMesNoise),' of ',num2str(length(LOOP.rngMesNoise)),' (',num2str(LOOP.rngMesNoise(LoopMesNoise)),' dB in ' ,'[ ',num2str(LOOP.rngMesNoise),' ])'])
-                disp(['BcgNoise: ',num2str(LoopBcgNoise),' of ',num2str(length(LOOP.rngBcgNoise)),' (',num2str(LOOP.rngBcgNoise(LoopBcgNoise)),' dB in ' ,'[ ',num2str(LOOP.rngBcgNoise),' ])'])
-                disp(['IntNoise: ',num2str(LoopIntNoise),' of ',num2str(length(LOOP.rngIntNoise)),' (',num2str(LOOP.rngIntNoise(LoopIntNoise)),' dB in ' ,'[ ',num2str(LOOP.rngIntNoise),' ])'])
-                disp('----------------------------')
-                disp(['SETUP.n00: ',num2str(SETUP.n00)])
-                disp(['SETUP.K00: ',num2str(SETUP.K00)])
-                % chkSim___tg_s01_PRE___001(SETUP)
-                disp('============================')
-                SETUP.SINR    = LOOP.rngIntNoise(LoopIntNoise);
-                SETUP.SBNR    = LOOP.rngBcgNoise(LoopBcgNoise);
-                SETUP.SMNR    = LOOP.rngMesNoise(LoopMesNoise);
-                if 1
-                    run('./tg_s07_BATCH___04_SNRs.m');
-                    run('./tg_s07_BATCH___05_Filters.m');
-                    LOOP.table_rowN{size(LOOP.progress,1)} = rec_res.table_rowN;
-                    LOOP.table_varN{size(LOOP.progress,1)} = rec_res.table_varN;
-                    LOOP.table_arrC(:,:,LoopSimCount,LoopMesNoise,LoopBcgNoise,LoopIntNoise) = rec_res.table_arrC;
-                end
-            end
-        end
-    end
-end
-if isequal(LOOP.table_rowN{:}), LOOP.table_rowN = LOOP.table_rowN{1}; else, error('CYBERCRAFT:: row names are inconsistent'); end;
-if isequal(LOOP.table_varN{:}), LOOP.table_varN = LOOP.table_varN{1}; else, error('CYBERCRAFT:: var names are inconsistent'); end;
+                     LOOP.iterations = [LOOP.iterations;LoopSimCount,LoopMesNoise,LoopBcgNoise,LoopIntNoise];
+                     LOOP.progress   = [LOOP.progress;LoopSimCount,LOOP.rngMesNoise(LoopMesNoise),LOOP.rngBcgNoise(LoopBcgNoise),LOOP.rngIntNoise(LoopIntNoise)];
+                     fprintf('\n');
+                     disp('============================')
+                     disp(['CurrIter: ',num2str(size(LOOP.progress,1)),' of ',num2str(size(LOOP.coords,1))])
+                     disp('----------------------------')
+                     disp(['SimCount: ',num2str(LoopSimCount),' of ',num2str(LOOP.totSimCount)])
+                     disp(['MesNoise: ',num2str(LoopMesNoise),' of ',num2str(length(LOOP.rngMesNoise)),' (',num2str(LOOP.rngMesNoise(LoopMesNoise)),' dB in ' ,'[ ',num2str(LOOP.rngMesNoise),' ])'])
+                     disp(['BcgNoise: ',num2str(LoopBcgNoise),' of ',num2str(length(LOOP.rngBcgNoise)),' (',num2str(LOOP.rngBcgNoise(LoopBcgNoise)),' dB in ' ,'[ ',num2str(LOOP.rngBcgNoise),' ])'])
+                     disp(['IntNoise: ',num2str(LoopIntNoise),' of ',num2str(length(LOOP.rngIntNoise)),' (',num2str(LOOP.rngIntNoise(LoopIntNoise)),' dB in ' ,'[ ',num2str(LOOP.rngIntNoise),' ])'])
+                     disp('----------------------------')
+                     disp(['SETUP.n00: ',num2str(SETUP.n00)])
+                     disp(['SETUP.K00: ',num2str(SETUP.K00)])
+                     % chkSim___tg_s01_PRE___001(SETUP)
+                     disp('============================')
+                     SETUP.SINR    = LOOP.rngIntNoise(LoopIntNoise);
+                     SETUP.SBNR    = LOOP.rngBcgNoise(LoopBcgNoise);
+                     SETUP.SMNR    = LOOP.rngMesNoise(LoopMesNoise);
+
+                     run('./tg_s07_BATCH___04_SNRs.m');
+                     run('./tg_s07_BATCH___05_Filters.m');
+
+                     % removes Original and Dummy signals from Figures
+                     if(SETUP.SHOWori==0)
+                         rec_res.table_rowN = rec_res.table_rowN(3:end);
+                         rec_res.table_arrC = rec_res.table_arrC(3:end,:);
+                     end
+
+                     LOOP.table_rowN{size(LOOP.progress,1)} = rec_res.table_rowN;
+                     LOOP.table_varN{size(LOOP.progress,1)} = rec_res.table_varN;
+                     LOOP.table_arrC(:,:,LoopSimCount,LoopMesNoise,LoopBcgNoise,LoopIntNoise) = rec_res.table_arrC;
+                 end
+             end
+         end
+     end
+     if isequal(LOOP.table_rowN{:}), LOOP.table_rowN = LOOP.table_rowN{1}; else, error('CYBERCRAFT:: row names are inconsistent'); end;
+     if isequal(LOOP.table_varN{:}), LOOP.table_varN = LOOP.table_varN{1}; else, error('CYBERCRAFT:: var names are inconsistent'); end;
 
    #+END_SRC
 

@@ -27,12 +27,12 @@ SETUP.DEEP   = [             0 0 20 ]; % deep sources
 
 SETUP.ERPs   = 0;       % Add ERPs (timelocked activity)
 
-SETUP.rROI   = 0;       % random (1) or predefined (0) ROIs
+SETUP.rROI   = 1;       % random (1) or predefined (0) ROIs
 
 
 % Basic setting s for sources and noise.
 SETUP.n00    = 500;     % number of time samples per trial
-SETUP.K00    = 2;      % number of independent realizations of signal and noise based on generated MVAR model
+SETUP.K00    = 1;      % number of independent realizations of signal and noise based on generated MVAR model
 SETUP.P00    = 6;       % order of the MVAR model used to generate time-courses for signal of interest
 SETUP.FRAC   = 0.20;    % proportion of ones to zeros in off-diagonal elements of the MVAR coefficients masking array
 SETUP.STAB   = 0.99;    % MVAR stability limit for MVAR eigenvalues (less than 1.0 results in more stable model producing more stationary signals)
@@ -42,7 +42,7 @@ SETUP.RNG    = [0,2.8]; % range for pseudo-random sampling of eigenvalues for MV
 % By default most of the output text, plot, checkup and other features is turned off for the batch simulations!!!
 SETUP.ITER   = 5e5;     % iterations limit for MVAR pseudo-random sampling and stability verification
 SETUP.PDC_RES = [0:0.01:0.5]; % resolution vector for normalized PDC estimation
-SETUP.TELL   = 1;       % provide additional comments during code execution ("tell me more")
+SETUP.TELL   = 0;       % provide additional comments during code execution ("tell me more")
 SETUP.PLOT   = 0;       % plot figures during the intermediate stages
 SETUP.SCRN   = get(0,'MonitorPositions'); % get screens positions
 SETUP.DISP   = SETUP.SCRN(end,:);        % force figures to be displayed on (3dr) screenscreen
@@ -55,13 +55,14 @@ clearvars ii jj kk nn tmp*
 % OK
 SETUP.RANK_EIG = sum(SETUP.SRCS(:,1)); % rank of EIG-LCMV filter: set to number of active sources
 SETUP.fltREMOVE = 1; %to keep (0) or remove (1) selected filters
+SETUP.SHOWori = 0; % to show (1) or do not show (0) Original and Dummy signals on Figures
 SETUP.IntLfgRANK = round(0.3*sum(SETUP.SRCS(:,2))); % rank of patch-constrained reduced-rank leadfield
 
 % Leadfields perturbation settings.
 SETUP.CUBE           = 20;    % perturbation of the leadfields based on the shift of source position within a cube of given edge length (centered at the original leadfields positions)
 SETUP.CONE           = pi/32; % perturbation of the leadfields based on the rotation of source orientation (azimuth TH, elevation PHI)
-SETUP.H_Src_pert     = 1;     % use original (0) or perturbed (1) leadfield for signal reconstruction
-SETUP.H_Int_pert     = 1;     % use original (0) or perturbed (1) leadfield for nulling constrains
+SETUP.H_Src_pert     = 0;     % use original (0) or perturbed (1) leadfield for signal reconstruction
+SETUP.H_Int_pert     = 0;     % use original (0) or perturbed (1) leadfield for nulling constrains
 SETUP.SINR           = 0;     % signal to interference noise power ratio expressed in dB (both measured on electrode level)
 SETUP.SBNR           = 0;     % signal to biological noise power ratio expressed in dB (both measured on electrode level)
 SETUP.SMNR           = 20;    % signal to measurment noise power ratio expressed in dB (both measured on electrode level)

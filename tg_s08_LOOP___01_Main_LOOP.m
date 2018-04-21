@@ -48,13 +48,19 @@ for LoopSimCount = 1:LOOP.totSimCount
                 SETUP.SINR    = LOOP.rngIntNoise(LoopIntNoise);
                 SETUP.SBNR    = LOOP.rngBcgNoise(LoopBcgNoise);
                 SETUP.SMNR    = LOOP.rngMesNoise(LoopMesNoise);
-                if 1
-                    run('./tg_s07_BATCH___04_SNRs.m');
-                    run('./tg_s07_BATCH___05_Filters.m');
-                    LOOP.table_rowN{size(LOOP.progress,1)} = rec_res.table_rowN;
-                    LOOP.table_varN{size(LOOP.progress,1)} = rec_res.table_varN;
-                    LOOP.table_arrC(:,:,LoopSimCount,LoopMesNoise,LoopBcgNoise,LoopIntNoise) = rec_res.table_arrC;
+
+                run('./tg_s07_BATCH___04_SNRs.m');
+                run('./tg_s07_BATCH___05_Filters.m');
+
+                % removes Original and Dummy signals from Figures
+                if(SETUP.SHOWori==0)
+                    rec_res.table_rowN = rec_res.table_rowN(3:end);
+                    rec_res.table_arrC = rec_res.table_arrC(3:end,:);
                 end
+
+                LOOP.table_rowN{size(LOOP.progress,1)} = rec_res.table_rowN;
+                LOOP.table_varN{size(LOOP.progress,1)} = rec_res.table_varN;
+                LOOP.table_arrC(:,:,LoopSimCount,LoopMesNoise,LoopBcgNoise,LoopIntNoise) = rec_res.table_arrC;
             end
         end
     end
