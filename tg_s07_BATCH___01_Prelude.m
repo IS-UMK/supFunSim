@@ -54,7 +54,7 @@ clearvars ii jj kk nn tmp*
 
 % OK
 SETUP.RANK_EIG = sum(SETUP.SRCS(:,1)); % rank of EIG-LCMV filter: set to number of active sources
-SETUP.fltREMOVE = 1; %to keep (0) or remove (1) selected filters
+SETUP.fltREMOVE = 1; % to keep (0) or remove (1) selected filters
 SETUP.SHOWori = 0; % to show (1) or do not show (0) Original and Dummy signals on Figures
 SETUP.IntLfgRANK = round(0.3*sum(SETUP.SRCS(:,2))); % rank of patch-constrained reduced-rank leadfield
 

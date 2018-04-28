@@ -276,7 +276,7 @@ SETUP.SCRN   = get(0,'MonitorPositions'); % get screens positions
 SETUP.DISP   = SETUP.SCRN(end,:);        % force figures to be displayed on (3dr) screenscreen
 SETUP.SEED   = rng(round(1e3*randn()^2*sum(clock)));
 SETUP.RANK_EIG = sum(SETUP.SRCS(:,1)); % rank of EIG-LCMV filter: set to number of active sources
-SETUP.fltREMOVE = 1; %to keep (0) or remove (1) selected filters
+SETUP.fltREMOVE = 1; % to keep (0) or remove (1) selected filters
 SETUP.SHOWori = 1; % to show (1) or do not show (0) Original and Dummy signals on Figures
 SETUP.IntLfgRANK = round(0.3*sum(SETUP.SRCS(:,2))); % rank of patch-constrained reduced-rank leadfield
 
@@ -2476,16 +2476,8 @@ rec_flt.sMVP_NL_N = P_sMVP_NL_N_opt*pinv(P_sMVP_NL_N*H_Src_N)*P_sMVP_NL_N*pinv(s
        #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s05_Spatial_filtering___02_Definitions.m :results silent
 
 if(SETUP.fltREMOVE)
-    rec_flt = rmfield(rec_flt,'ZF');
     rec_flt = rmfield(rec_flt,'RANDN');
     rec_flt = rmfield(rec_flt,'ZEROS');
-    rec_flt = rmfield(rec_flt,'MMSE');
-    rec_flt = rmfield(rec_flt,'EIG_LCMV_R');
-    rec_flt = rmfield(rec_flt,'EIG_LCMV_N');
-    rec_flt = rmfield(rec_flt,'sMVP_MSE');
-    rec_flt = rmfield(rec_flt,'sMVP_R');
-    rec_flt = rmfield(rec_flt,'sMVP_NL_MSE');
-    rec_flt = rmfield(rec_flt,'sMVP_NL_R');
 end
 
        #+END_SRC
@@ -3140,7 +3132,7 @@ clearvars ii jj kk nn tmp*
 
 % OK
 SETUP.RANK_EIG = sum(SETUP.SRCS(:,1)); % rank of EIG-LCMV filter: set to number of active sources
-SETUP.fltREMOVE = 1; %to keep (0) or remove (1) selected filters
+SETUP.fltREMOVE = 1; % to keep (0) or remove (1) selected filters
 SETUP.SHOWori = 0; % to show (1) or do not show (0) Original and Dummy signals on Figures
 SETUP.IntLfgRANK = round(0.3*sum(SETUP.SRCS(:,2))); % rank of patch-constrained reduced-rank leadfield
 
@@ -3230,6 +3222,8 @@ run('./tg_s06_Error_evaluation.m')
    #+NAME: ./tg_s08_LOOP___00_RUN.m
    #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s08_LOOP___00_RUN.m :results silent
 
+     % LOOP.table_arrC_avgSimCount contains simulation results averaged over simulation runs set in LOOP.totSimCount. The dimensions of LOOP.table_arrC_avgSimCount are filters x error_types x SNRs. Similarly, LOOP.table_arrC_stdSimCount contains standard deviations of simulation results averaged over simulation runs. 
+
      if exist('fPath'), cd(fPath); else, try, cd('~/supFunSim/'); catch, warningMessage = 'Problem encoutered while trying to change working directory to ''~/supFunSim/''.'; uiwait(msgbox(warningMessage)); warning(warningMessage); end; end; disp(['CYBERCRAFT:: pwd is: ',pwd])
 
      clearvars ii jj kk nn tmp* LOOP* Loop*;
@@ -3241,7 +3235,7 @@ run('./tg_s06_Error_evaluation.m')
      LOOP.NAME = tempname; [~, LOOP.NAME] = fileparts(LOOP.NAME); % simulation unique name
 
      % Number of simulation runs for each SNRs combination
-     LOOP.totSimCount = 100;
+     LOOP.totSimCount = 2;
      LOOP.rngSimCount = 1:LOOP.totSimCount;
 
      % Range of SNRs (defaults are consequently [20], [0] and [0,10,20])
