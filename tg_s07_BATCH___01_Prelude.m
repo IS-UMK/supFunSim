@@ -32,7 +32,7 @@ SETUP.rROI   = 1;       % random (1) or predefined (0) ROIs
 
 % Basic setting s for sources and noise.
 SETUP.n00    = 500;     % number of time samples per trial
-SETUP.K00    = 1;      % number of independent realizations of signal and noise based on generated MVAR model
+SETUP.K00    = 50;      % number of independent realizations of signal and noise based on generated MVAR model
 SETUP.P00    = 6;       % order of the MVAR model used to generate time-courses for signal of interest
 SETUP.FRAC   = 0.20;    % proportion of ones to zeros in off-diagonal elements of the MVAR coefficients masking array
 SETUP.STAB   = 0.99;    % MVAR stability limit for MVAR eigenvalues (less than 1.0 results in more stable model producing more stationary signals)
