@@ -30,6 +30,7 @@ LOOP.table_varN'
 LOOP.table_rowN
 size(LOOP.table_arrC)
 
+% results are averaged over simulation runs
 LOOP.table_arrC_avgSimCount = squeeze(mean(LOOP.table_arrC,3))
 LOOP.table_arrC_stdSimCount = squeeze(std(LOOP.table_arrC,[],3))
 size(LOOP.table_arrC_avgSimCount)
