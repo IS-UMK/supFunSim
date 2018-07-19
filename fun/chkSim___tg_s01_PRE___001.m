@@ -1,4 +1,3 @@
-
 function chkSim___tg_s01_PRE___001(SETUP)
     fprintf('     \n');
     fprintf('CYBERCRAFT:: Number of signal types per CORTEX ROI:\n\n');

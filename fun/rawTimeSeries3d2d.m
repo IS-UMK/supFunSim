@@ -1,4 +1,3 @@
-
 function y = rawTimeSeries3d2d(x)
 
 % y = rawTimeSeries3d2d(x)

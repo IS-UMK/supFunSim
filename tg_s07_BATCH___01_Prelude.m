@@ -1,5 +1,4 @@
-
-fPath='/home/metalipa/supFunSim/';
+fPath='/home/metalipa/supFunSim_KIS_RECONSTRUCTION_VERSION_ORIGIN_KIS/';
 
 % Tidy up and change working directory.
 clc; close all;clearvars('-except','fPath');

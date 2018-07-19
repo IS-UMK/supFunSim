@@ -1,4 +1,3 @@
-
 function M00 = cccSim___diagonMask(S00,M00_frc)
 % cccSim___diagonMask produces masking square array M (SxS) whose all diagonal and some off-diagonal elements are ones. All
 % othere elements are zeros. The off-diagonal elements are sampled pseudo-randomly and their number is declared by

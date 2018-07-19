@@ -1,4 +1,3 @@
-
 function [y] = rawCartToSph(x)
 % Convert cartesian to spherical coordinates (row-wise)
     if ~isempty(x)

@@ -1,4 +1,3 @@
-
 function rawPlotPDC(pdcData,accf)
     tmp_row  = size(pdcData,1);
     tmp_col  = size(pdcData,2);

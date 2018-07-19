@@ -1,4 +1,3 @@
-
 clearvars sim_geo_cort ii jj kk nn tmp*
 sim_geo_cort.numROIs = size(sel_atl.Atlas(sel_atl.atl).Scouts,2);
 

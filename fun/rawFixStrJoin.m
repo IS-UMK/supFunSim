@@ -1,4 +1,3 @@
-
 function [] = rawFixStrJoin()
     disp('=== Before ===')
     which('strjoin','-all')

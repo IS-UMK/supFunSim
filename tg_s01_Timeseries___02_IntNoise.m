@@ -1,4 +1,3 @@
-
 clearvars sim_sig_IntNoise tmp*
 sim_sig_IntNoise = sim_sig_SrcActiv;
 

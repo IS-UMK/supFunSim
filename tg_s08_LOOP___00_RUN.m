@@ -1,4 +1,3 @@
-
 % LOOP.table_arrC_avgSimCount contains simulation results averaged over simulation runs set in LOOP.totSimCount. The dimensions of LOOP.table_arrC_avgSimCount are filters x error_types x SNRs. Similarly, LOOP.table_arrC_stdSimCount contains standard deviations of simulation results averaged over simulation runs. 
 
 if exist('fPath'), cd(fPath); else, try, cd('~/supFunSim/'); catch, warningMessage = 'Problem encoutered while trying to change working directory to ''~/supFunSim/''.'; uiwait(msgbox(warningMessage)); warning(warningMessage); end; end; disp(['CYBERCRAFT:: pwd is: ',pwd])

@@ -1,4 +1,3 @@
-
 function [y] = rawHotColdColorMap(x)
 % [y] = rawHotColdColorMap(x)
 % Suggested rationalization: base/2

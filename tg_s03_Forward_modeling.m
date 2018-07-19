@@ -1,4 +1,3 @@
-
 clearvars ii jj kk nn tmp*
 for kk = 1:SETUP.K00
     sim_sig_SrcActiv.sigSNS_pre(:,:,kk) = (sim_lfg_SrcActiv_orig.LFG*sim_sig_SrcActiv.sigSRC_pre(:,:,kk)')';

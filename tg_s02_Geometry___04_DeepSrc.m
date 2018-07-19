@@ -1,4 +1,3 @@
-
 clearvars sel_geo_deep ii jj kk ll nn tmp*
 
 sim_geo_deep = sel_geo_deep_icosahedron642;

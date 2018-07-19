@@ -1,4 +1,3 @@
-
 function chkSim___tg_s02_Geometry___02_Indices___Plot_001(sel_atl,sim_geo_cort)
     hold on
     tmp_colorBar = lines(length(sim_geo_cort.lstROIs));

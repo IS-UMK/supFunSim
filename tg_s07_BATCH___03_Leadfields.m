@@ -1,4 +1,3 @@
-
 run('./tg_s02_Geometry___01_RandSamp.m')
 run('./tg_s02_Geometry___02_Indices.m')
 run('./tg_s02_Geometry___03_Coordinates.m')

@@ -1,4 +1,3 @@
-
 clearvars ii jj kk nn tmp*
 
 sim_sig_AdjSNRs.SrcActivPre = sim_sig_SrcActiv.sigSNS_pre;
