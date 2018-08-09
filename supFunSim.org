@@ -55,10 +55,10 @@ electroencephalography (EEG).
 
    Herein we adapt number of solutions provided in toolboxes developed
    by others, namely:
-    - [[http://www.fieldtriptoolbox.org/][FieldTrip]],
-    - [[http://www.cs.tut.fi/~gomezher/projects/eeg/mvarica.htm][MVAR-ICA]],
-    - [[http://climate-dynamics.org/software/#arfit][ARfit]] and
-    - [[https://sccn.ucsd.edu/eeglab/][EEGlab]]
+   - [[http://www.fieldtriptoolbox.org/][FieldTrip]],
+   - [[http://www.cs.tut.fi/~gomezher/projects/eeg/mvarica.htm][MVAR-ICA]],
+   - [[http://climate-dynamics.org/software/#arfit][ARfit]] and
+   - [[https://sccn.ucsd.edu/eeglab/][EEGlab]]
 
    Also, please note that creation of this document is an ongoing
    process as we intend to expand it (therefore we are not seeking for
@@ -111,17 +111,17 @@ electroencephalography (EEG).
 *** Specific software versions
 **** Basic info
 
-    We have tested =supFunSim= using:
-    - Lenovo ThinkPad W540:
-      - Intel(R) Core(TM) i7-4910MQ CPU @ 2.90GHz,
-      - 32768 MB RAM 1600 MHz DDR3,
-    - GNU with Linux operating system:
-      - SUSE Linux Enterprise Desktop 12 SP2,
-      - x86_64-suse-linux-gnu,
-      - kernel release 4.4.21-81-default,
-    - software:
-      - GNU Emacs 25.1.2 (GTK+ Version 3.20.9),
-      - MathWorks MATLAB R2017a (9.2.0.538062).
+     We have tested =supFunSim= using:
+     - Lenovo ThinkPad W540:
+       - Intel(R) Core(TM) i7-4910MQ CPU @ 2.90GHz,
+       - 32768 MB RAM 1600 MHz DDR3,
+     - GNU with Linux operating system:
+       - SUSE Linux Enterprise Desktop 12 SP2,
+       - x86_64-suse-linux-gnu,
+       - kernel release 4.4.21-81-default,
+     - software:
+       - GNU Emacs 25.1.2 (GTK+ Version 3.20.9),
+       - MathWorks MATLAB R2017a (9.2.0.538062).
 
 ** DOIN [i04] Licensing (GPL)
 
@@ -157,9 +157,9 @@ electroencephalography (EEG).
     functions.  It also loads initial data:
     - head compartments geometry (cortex)
       - [[./mat/sel_msh.mat]]
-    - mesh containing candidates for lacation of deep sources (based on thalami)
+    - mesh containing candidates for the location of deep sources (based on thalami)
       - [[./mat/sel_geo_deep_thalami.mat]]
-    - mesh containing candidates for lacation of deep sources (based on icosahedron642)
+    - mesh containing candidates for the location of deep sources (based on icosahedron642)
       - [[./mat/sel_geo_deep_icosahedron642.mat]]
     - cortex geometry with (anatomical) ROI parcellation
       - [[./mat/sel_atl.mat]]
@@ -167,6 +167,40 @@ electroencephalography (EEG).
       - [[./mat/sel_vol.mat]]
     - geometry of electrode positions
       - [[./mat/sel_ele.mat]]
+
+    Additionally we also provide:
+    - pre-computed leadfields for the above mentioned source candidates
+      - [[./mat/sel_src.mat]]
+
+    Contents of the above mentioned files can be checked with:
+
+    #+BEGIN_SRC matlab :session *MATLAB* :eval yes :results silent :tangle no
+
+whos('-file','./mat/sel_atl.mat')
+whos('-file','./mat/sel_ele.mat')
+whos('-file','./mat/sel_geo_deep_icosahedron642.mat')
+whos('-file','./mat/sel_geo_deep_thalami.mat')
+whos('-file','./mat/sel_mri00.mat')
+whos('-file','./mat/sel_msh.mat')
+whos('-file','./mat/sel_src.mat')
+whos('-file','./mat/sel_vol.mat')
+
+    #+END_SRC
+
+    Load each file separately (mostly for testing and didactic purpose).
+
+    #+BEGIN_SRC matlab :session *MATLAB* :eval yes :results silent :tangle no
+
+load('./mat/sel_atl.mat')
+load('./mat/sel_ele.mat')
+load('./mat/sel_geo_deep_icosahedron642.mat')
+load('./mat/sel_geo_deep_thalami.mat')
+load('./mat/sel_mri00.mat')
+load('./mat/sel_msh.mat')
+load('./mat/sel_src.mat')
+load('./mat/sel_vol.mat')
+
+    #+END_SRC
 
     NB: For the sake of *backward compatibility* and to facilitate
     *bug tracking*, it also provides initial settings for the
@@ -215,70 +249,80 @@ electroencephalography (EEG).
     #+NAME: ./tg_s00_Prelude___01_Simulations_main_setup.m
     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s00_Prelude___01_Simulations_main_setup.m :results silent :var fPath = (file-name-directory (or load-file-name buffer-file-name))
 
-% Tidy up workspace and change working directory
-clc; close all;clearvars('-except','fPath');
-if exist('fPath'), cd(fPath); else, try, cd('~/supFunSim/'); catch, warningMessage = 'Problem encoutered while trying to change working directory to ''~/supFunSim/''.'; uiwait(msgbox(warningMessage)); warning(warningMessage); end; end; disp(['CYBERCRAFT:: pwd is: ',pwd])
+      % Tidy up workspace and change working directory
+      clc; close all;clearvars('-except','fPath');
+      if exist('fPath'), cd(fPath); else, try, cd('~/supFunSim/'); catch, warningMessage = 'Problem encoutered while trying to change working directory to ''~/supFunSim/''.'; end; end; disp(['CYBERCRAFT:: pwd is: ',pwd])
 
-% Add path to additional functions
-addpath([pwd,'/fun']);
+      % Add path to additional functions
+      addpath([pwd,'/fun']);
 
-% Add path to toolboxes
-if 0, disp('COMMENT: if having problems with toolboxes consider wise use of:'); restoredefaultpath; end
-clearvars TMP_TOOLB_PATH; if exist('~/toolboxes/','dir') == 7, TMP_TOOLB_PATH = '~/toolboxes/'; else, warningMessage = sprintf('CYBERCRAFT:: Warning:: toolboxes directory was not found (use ''~/toolboxes/'')'); uiwait(msgbox(warningMessage)); warning(warningMessage); end; if exist('TMP_TOOLB_PATH','var'), disp(['CYBERCRAFT:: looking for toolboxes in: ',TMP_TOOLB_PATH]), end;
-addpath([TMP_TOOLB_PATH,'/arfit']);
-addpath([TMP_TOOLB_PATH,'/mvarica']);
-addpath([TMP_TOOLB_PATH,'spm12/']);
-addpath([TMP_TOOLB_PATH,'spm12/toolbox/aal/']);
-addpath([TMP_TOOLB_PATH,'eeglab/']);
-addpath([TMP_TOOLB_PATH,'fieldtrip/']); ft_defaults;
-if exist([TMP_TOOLB_PATH,'fieldtrip/privatePublic/',filesep]),         addpath([TMP_TOOLB_PATH,'fieldtrip/privatePublic/',filesep]);         else, copyfile([TMP_TOOLB_PATH,'fieldtrip/private/',filesep],        [TMP_TOOLB_PATH,'fieldtrip/privatePublic/',filesep]);         addpath([TMP_TOOLB_PATH,'fieldtrip/privatePublic/',filesep]);         end;
-if exist([TMP_TOOLB_PATH,'fieldtrip/forward/privatePublic/',filesep]), addpath([TMP_TOOLB_PATH,'fieldtrip/forward/privatePublic/',filesep]); else, copyfile([TMP_TOOLB_PATH,'fieldtrip/forward/private/',filesep],[TMP_TOOLB_PATH,'fieldtrip/forward/privatePublic/',filesep]); addpath([TMP_TOOLB_PATH,'fieldtrip/forward/privatePublic/',filesep]); end;
-addpath([TMP_TOOLB_PATH,'fieldtrip/utilities']);
-if exist([TMP_TOOLB_PATH,'fieldtrip/utilities/privatePublic/',filesep]), addpath([TMP_TOOLB_PATH,'fieldtrip/utilities/privatePublic/',filesep]); else, copyfile([TMP_TOOLB_PATH,'fieldtrip/utilities/private/',filesep],[TMP_TOOLB_PATH,'fieldtrip/utilities/privatePublic/',filesep]); addpath([TMP_TOOLB_PATH,'fieldtrip/utilities/privatePublic/',filesep]); end;
+      % Add path to toolboxes
+      if 0, disp('COMMENT: if having problems with toolboxes consider wise use of:'); restoredefaultpath; end
+      clearvars TMP_TOOLB_PATH; if exist('~/toolboxes/','dir') == 7, TMP_TOOLB_PATH = '~/toolboxes/'; else, warningMessage = sprintf('CYBERCRAFT:: Warning:: toolboxes directory was not found (use ''~/toolboxes/'')'); end; if exist('TMP_TOOLB_PATH','var'), disp(['CYBERCRAFT:: looking for toolboxes in: ',TMP_TOOLB_PATH]), end;
+      addpath([TMP_TOOLB_PATH,'/arfit']);
+      addpath([TMP_TOOLB_PATH,'/mvarica']);
+      addpath([TMP_TOOLB_PATH,'spm12/']);
+      addpath([TMP_TOOLB_PATH,'spm12/toolbox/aal/']);
+      addpath([TMP_TOOLB_PATH,'eeglab/']);
+      addpath([TMP_TOOLB_PATH,'fieldtrip/']); ft_defaults;
+      if exist([TMP_TOOLB_PATH,'fieldtrip/privatePublic/',filesep]),         addpath([TMP_TOOLB_PATH,'fieldtrip/privatePublic/',filesep]);         else, copyfile([TMP_TOOLB_PATH,'fieldtrip/private/',filesep],        [TMP_TOOLB_PATH,'fieldtrip/privatePublic/',filesep]);         addpath([TMP_TOOLB_PATH,'fieldtrip/privatePublic/',filesep]);         end;
+      if exist([TMP_TOOLB_PATH,'fieldtrip/forward/privatePublic/',filesep]), addpath([TMP_TOOLB_PATH,'fieldtrip/forward/privatePublic/',filesep]); else, copyfile([TMP_TOOLB_PATH,'fieldtrip/forward/private/',filesep],[TMP_TOOLB_PATH,'fieldtrip/forward/privatePublic/',filesep]); addpath([TMP_TOOLB_PATH,'fieldtrip/forward/privatePublic/',filesep]); end;
+      addpath([TMP_TOOLB_PATH,'fieldtrip/utilities']);
+      if exist([TMP_TOOLB_PATH,'fieldtrip/utilities/privatePublic/',filesep]), addpath([TMP_TOOLB_PATH,'fieldtrip/utilities/privatePublic/',filesep]); else, copyfile([TMP_TOOLB_PATH,'fieldtrip/utilities/private/',filesep],[TMP_TOOLB_PATH,'fieldtrip/utilities/privatePublic/',filesep]); addpath([TMP_TOOLB_PATH,'fieldtrip/utilities/privatePublic/',filesep]); end;
 
-% Load head geometry, electrode positions and ROIs data.
-load('./mat/sel_msh.mat');                     % head compartments geometry (cortex)
-load('./mat/sel_geo_deep_thalami.mat');        % mesh containing candidates for lacation of deep sources (based on thalami)
-load('./mat/sel_geo_deep_icosahedron642.mat'); % mesh containing candidates for lacation of deep sources (based on icosahedron642)
-load('./mat/sel_atl.mat');                     % cortex geometry with (anatomical) ROI parcellation
-load('./mat/sel_vol.mat');                     % volume conduction model (head-model)
-load('./mat/sel_ele.mat');                     % geometry of electrode positions
+      % Initialize FieldTrip
+      ft_defaults;
 
-clearvars ii jj kk mm nn tmp* SETUP
+      % Load head geometry, electrode positions and ROIs data.
+      load('./mat/sel_msh.mat');                     % head compartments geometry (cortex)
+      load('./mat/sel_geo_deep_thalami.mat');        % mesh containing candidates for lacation of deep sources (based on thalami)
+      load('./mat/sel_geo_deep_icosahedron642.mat'); % mesh containing candidates for lacation of deep sources (based on icosahedron642)
+      load('./mat/sel_atl.mat');                     % cortex geometry with (anatomical) ROI parcellation
+      load('./mat/sel_vol.mat');                     % volume conduction model (head-model)
+      load('./mat/sel_ele.mat');                     % geometry of electrode positions
+      load('./mat/sel_src.mat');                     % all cx leadfields
 
-% Simulations main setup
-SETUP.SRCS   = []; % Cortical sources (avoid placing more than 10 sources in single ROI)
-SETUP.SRCS   = [ SETUP.SRCS;  2  0  3 ];
-SETUP.SRCS   = [ SETUP.SRCS;  2  0  0 ];
-SETUP.SRCS   = [ SETUP.SRCS;  2  1  0 ];
-SETUP.SRCS   = [ SETUP.SRCS;  0  4  0 ];
-SETUP.SRCS   = [ SETUP.SRCS;  0  4  0 ];
-SETUP.SRCS   = [ SETUP.SRCS;  0  4  0 ];
-SETUP.SRCS   = [ SETUP.SRCS;  0  4  3 ];
-SETUP.SRCS   = [ SETUP.SRCS;  0  0  3 ];
-SETUP.SRCS   = [ SETUP.SRCS;  0  0  3 ];
-SETUP.SRCS   = [ SETUP.SRCS;  0  0  3 ];
-SETUP.DEEP   = [              2  1  6 ]; % deep sources
-SETUP.ERPs   = 5;       % Add ERPs (timelocked activity)
-SETUP.rROI   = 0;       % random (1) or predefined (0) ROIs
-SETUP.ELEC   = size(sel_ele.elecpos,1); % number of electrodes
-SETUP.n00    = 500;     % number of time samples per trial
-SETUP.K00    = 50;      % number of independent realizations of signal and noise based on generated MVAR model
-SETUP.P00    = 6;       % order of the MVAR model used to generate time-courses for signal of interest
-SETUP.FRAC   = 0.20;    % proportion of ones to zeros in off-diagonal elements of the MVAR coefficients masking array
-SETUP.STAB   = 0.99;    % MVAR stability limit for MVAR eigenvalues (less than 1.0 results in more stable model producing more stationary signals)
-SETUP.RNG    = [0,2.8]; % range for pseudo-random sampling of eigenvalues for MVAR coefficients range
-SETUP.ITER   = 5e5;     % iterations limit for MVAR pseudo-random sampling and stability verification
-SETUP.PDC_RES = [0:0.01:0.5]; % resolution vector for normalized PDC estimation
-SETUP.TELL   = 1;       % provide additional comments during code execution ("tell me more")
-SETUP.PLOT   = 1;       % plot figures during the intermediate stages
-SETUP.SCRN   = get(0,'MonitorPositions'); % get screens positions
-SETUP.DISP   = SETUP.SCRN(end,:);        % force figures to be displayed on (3dr) screenscreen
-SETUP.SEED   = rng(round(1e3*randn()^2*sum(clock)));
-SETUP.RANK_EIG = sum(SETUP.SRCS(:,1)); % rank of EIG-LCMV filter: set to number of active sources
-SETUP.fltREMOVE = 1; % to keep (0) or remove (1) selected filters
-SETUP.SHOWori = 1; % to show (1) or do not show (0) Original and Dummy signals on Figures
-SETUP.IntLfgRANK = round(0.3*sum(SETUP.SRCS(:,2))); % rank of patch-constrained reduced-rank leadfield
+      clearvars ii jj kk mm nn tmp* SETUP
+
+      % Simulations main setup
+      SETUP.rROI   = logical(0);       % random (1) or predefined (0) ROIs
+      SETUP.rPNT   = logical(0);       % random (1) or predefined (0) candidate points for source locations: if 0, 
+				       % number of sources as in SETUP.SRCS(1,1) will be fixed and in close locations
+      SETUP.SRCS   = []; % Cortical sources (avoid placing more than 10 sources in single ROI)
+      SETUP.SRCS   = [ SETUP.SRCS;  8  0  3 ];
+      SETUP.SRCS   = [ SETUP.SRCS;  2  0  0 ];
+      SETUP.SRCS   = [ SETUP.SRCS;  2  1  0 ];
+      SETUP.SRCS   = [ SETUP.SRCS;  0  4  0 ];
+      SETUP.SRCS   = [ SETUP.SRCS;  0  4  0 ];
+      SETUP.SRCS   = [ SETUP.SRCS;  0  4  0 ];
+      SETUP.SRCS   = [ SETUP.SRCS;  0  4  3 ];
+      SETUP.SRCS   = [ SETUP.SRCS;  0  0  3 ];
+      SETUP.SRCS   = [ SETUP.SRCS;  0  0  3 ];
+      SETUP.SRCS   = [ SETUP.SRCS;  0  0  3 ];
+      SETUP.DEEP   = [              2  1  6 ]; % deep sources
+      SETUP.ERPs   = 5;       % Add ERPs (timelocked activity)
+      SETUP.rROI   = 0;       % random (1) or predefined (0) ROIs
+      SETUP.ELEC   = size(sel_ele.elecpos,1); % number of electrodes
+      SETUP.n00    = 500;     % number of time samples per trial
+      SETUP.K00    = 1;       % number of independent realizations of signal and noise based on generated MVAR model
+			      % note: covariance matrix R of observed signal and noise covariance matrix N are estimated from samples originating 
+			      % from all realizations of signal and noise 
+      SETUP.P00    = 6;       % order of the MVAR model used to generate time-courses for signal of interest
+      SETUP.FRAC   = 0.20;    % proportion of ones to zeros in off-diagonal elements of the MVAR coefficients masking array
+      SETUP.STAB   = 0.99;    % MVAR stability limit for MVAR eigenvalues (less than 1.0 results in more stable model producing more stationary signals)
+      SETUP.RNG    = [0,2.8]; % range for pseudo-random sampling of eigenvalues for MVAR coefficients range
+      SETUP.ITER   = 5e5;     % iterations limit for MVAR pseudo-random sampling and stability verification
+      SETUP.PDC_RES = [0:0.01:0.5]; % resolution vector for normalized PDC estimation
+      SETUP.TELL   = 1;       % provide additional comments during code execution ("tell me more")
+      SETUP.PLOT   = 1;       % plot figures during the intermediate stages
+      SETUP.SCRN   = get(0,'MonitorPositions'); % get screens positions
+      SETUP.DISP   = SETUP.SCRN(end,:);        % force figures to be displayed on (3dr) screenscreen
+      SETUP.SEED   = rng(round(1e3*randn()^2*sum(clock)));
+      SETUP.RANK_EIG = sum(SETUP.SRCS(:,1)); % rank of EIG-LCMV filter: set to number of active sources
+      SETUP.fltREMOVE = 1; % to keep (0) or remove (1) selected filters
+      SETUP.SHOWori = 1; % to show (1) or do not show (0) Original and Dummy signals on Figures
+      SETUP.IntLfgRANK = round(0.3*sum(SETUP.SRCS(:,2))); % rank of patch-constrained reduced-rank leadfield
+      SETUP.supSwitch = 'loc'; % 'rec': run reconstruction of sources activity, 'loc': find active sources
 
     #+END_SRC
 
@@ -399,13 +443,13 @@ end
     [[*%5Bs08%5D%20LOOP][LOOP]], the two sections that can be found very close to the end of
     this document.
 
-    #+NAME: ./tg_s00_Prelude___02_SNR_Adjustment.m
-    #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s00_Prelude___02_SNR_Adjustment.m :results silent
+    #+NAME: ./tg_s00_Prelude___02_SNR_Adjustments.m
+    #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s00_Prelude___02_SNR_Adjustments.m :results silent
 
 SETUP.CUBE           = 20;    % perturbation of the leadfields based on the shift of source position within a cube of given edge length (centered at the original leadfields positions)
 SETUP.CONE           = pi/32; % perturbation of the leadfields based on the rotation of source orientation (azimuth TH, elevation PHI)
-SETUP.H_Src_pert     = 1;     % use original (0) or perturbed (1) leadfield for signal reconstruction
-SETUP.H_Int_pert     = 1;     % use original (0) or perturbed (1) leadfield for nulling constrains
+SETUP.H_Src_pert     = 0;     % use original (0) or perturbed (1) leadfield for signal reconstruction
+SETUP.H_Int_pert     = 0;     % use original (0) or perturbed (1) leadfield for nulling constrains
 SETUP.SINR           = 5;     % signal to interference noise power ratio expressed in dB (both measured on electrode level)
 SETUP.SBNR           = 10;    % signal to biological noise power ratio expressed in dB (both measured on electrode level)
 SETUP.SMNR           = 15;    % signal to measurment noise power ratio expressed in dB (both measured on electrode level)
@@ -413,6 +457,23 @@ SETUP.WhtNoiseAddFlg = 1;     % white noise admixture in biological noise interf
 SETUP.WhtNoiseAddSNR = 3;     % SNR of BcgNoise and WhiNo (dB)
 SETUP.SigPre = 0;   SETUP.IntPre = 0;   SETUP.BcgPre = 1;   SETUP.MesPre = 1; % final signal components for pre-interval  (use zero or one for signal, interference noise, biological noise, measurement noise)
 SETUP.SigPst = 1;   SETUP.IntPst = 1;   SETUP.BcgPst = 1;   SETUP.MesPst = 1; % final signal components for post-interval (as above)
+
+     % For localization, the default is to consider random locations of ROI with some fixed candidate points such that 
+     % SETUP.SRCS(1,1) of them are in close locations; additionally, no interfering sources are considered
+     % in the localization model. You may comment out the 'if' section below to experiment with other settings.
+     if(SETUP.supSwitch == 'loc') 
+	 SETUP.rROI   = logical(1);       % random (1) or predefined (0) ROIs
+	 SETUP.rPNT   = logical(0);       % random (1) or predefined (0) candidate points for source locations: if 0, 
+					  % number of sources as in SETUP.SRCS(1,1) will be fixed and in close locations
+	 SETUP.SigPre = 0;   SETUP.IntPre = 0;   SETUP.BcgPre = 1;   SETUP.MesPre = 1; % final signal components for pre-interval  (use zero or one for signal, interference noise, biological noise, measurement noise)
+	 SETUP.SigPst = 1;   SETUP.IntPst = 0;   SETUP.BcgPst = 1;   SETUP.MesPst = 1; % final signal components for post-interval (as above)
+     end
+
+if SETUP.rPNT
+    disp('CC: using random source locations')
+else
+    disp('CC: using predefined source locations')
+end
 
     #+END_SRC
 
@@ -451,19 +512,20 @@ end
      #+END_SRC
 
 ** DONE [s01] Time series for activity and noise sources
+*** DONE Description
 
-   Code in this section produces timeseries for the signals described
-   in the table below.
+    Code in this section produces timeseries for the signals described
+    in the table below.
 
-   | Variable name    | Description                                         |
-   |------------------+-----------------------------------------------------|
-   | sim_sig_SrcActiv | Activity of interest (biological)                   |
-   | sim_sig_IntNoise | Interference (biological) noise                     |
-   | sim_sig_BcgNoise | Background (biological) noise                       |
-   |------------------+-----------------------------------------------------|
-   | sim_sig_MesNoise | Measurement noise                                   |
-   |------------------+-----------------------------------------------------|
-   | sim_sig_AdjSNRs  | All the above signals combined and adjusted for SNR |
+    | Variable name    | Description                                         |
+    |------------------+-----------------------------------------------------|
+    | sim_sig_SrcActiv | Activity of interest (biological)                   |
+    | sim_sig_IntNoise | Interference (biological) noise                     |
+    | sim_sig_BcgNoise | Background (biological) noise                       |
+    |------------------+-----------------------------------------------------|
+    | sim_sig_MesNoise | Measurement noise                                   |
+    |------------------+-----------------------------------------------------|
+    | sim_sig_AdjSNRs  | All the above signals combined and adjusted for SNR |
 
 *** MVAR modeling for bioelectrical activity sources
 **** Info
@@ -476,34 +538,34 @@ end
 **** MVAR modeling (theory)
 ***** MVAR model basics
 
-     See:
-     - [[./toolboxes/arfit/arfit.pdf]]
-     - [[./toolboxes/arfit/arfit_alg.pdf]]
-     - [[./toolboxes/mvarica/arfit/arfit.pdf]]
-     - [[./toolboxes/mvarica/arfit/arfit_alg.pdf]]
-     - [[~/cc_overkill/pdf/papers/2001 - Neumaier,Schneider - Algorithm 808: ARFIT —A Matlab Package for the Estimation of Parameters and Eigenmodes of Multivariate Autoregressive Models.pdf][2001 - Neumaier,Schneider - Algorithm 808: ARFIT —A Matlab Package for the Estimation of Parameters and Eigenmodes of Multivariate Autoregressive Models.pdf]]
-     - https://sccn.ucsd.edu/wiki/Chapter_3._Multivariate_Autoregressive_Modeling
+      See:
+      - [[./toolboxes/arfit/arfit.pdf]]
+      - [[./toolboxes/arfit/arfit_alg.pdf]]
+      - [[./toolboxes/mvarica/arfit/arfit.pdf]]
+      - [[./toolboxes/mvarica/arfit/arfit_alg.pdf]]
+      - [[~/cc_overkill/pdf/papers/2001 - Neumaier,Schneider - Algorithm 808: ARFIT —A Matlab Package for the Estimation of Parameters and Eigenmodes of Multivariate Autoregressive Models.pdf][2001 - Neumaier,Schneider - Algorithm 808: ARFIT —A Matlab Package for the Estimation of Parameters and Eigenmodes of Multivariate Autoregressive Models.pdf]]
+      - https://sccn.ucsd.edu/wiki/Chapter_3._Multivariate_Autoregressive_Modeling
 
-     # {{x}_{t}}=v+\underset{k=1}{\overset{p}{\mathop \sum }}\,{{A}_{k}}{{x}_{t-k}}+{{u}_{t}}
+      # {{x}_{t}}=v+\underset{k=1}{\overset{p}{\mathop \sum }}\,{{A}_{k}}{{x}_{t-k}}+{{u}_{t}}
 
-     ${{v}_{\nu}}=w+\underset{l=1}{\overset{p}{\mathop \sum }}\,{{A}_{l}}{{v}_{\nu-l}}+{{\varepsilon}_{\nu}}$, where
+      ${{v}_{\nu}}=w+\underset{l=1}{\overset{p}{\mathop \sum }}\,{{A}_{l}}{{v}_{\nu-l}}+{{\varepsilon}_{\nu}}$, where
 
-     - ${{v}_{\nu}}$ are the $m$-dimensional state vectors of (stationary)
-       time series,
+      - ${{v}_{\nu}}$ are the $m$-dimensional state vectors of (stationary)
+	time series,
 
-     - $p$ is the order of the model,
+      - $p$ is the order of the model,
 
-     - matrices ${{A}_{1}}\ldots{{A}_{p}} \in R^{m\times{}m}$ are the
-       coefficient matrices of the AR model,
+      - matrices ${{A}_{1}}\ldots{{A}_{p}} \in R^{m\times{}m}$ are the
+	coefficient matrices of the AR model,
 
-     - ${{\varepsilon}_{\nu}}$ are the $m$-dimensional uncorrelated
-       random vectors with mean zero and covariance matrix $C \in
-       R^{m\times{}m}$
+      - ${{\varepsilon}_{\nu}}$ are the $m$-dimensional uncorrelated
+	random vectors with mean zero and covariance matrix $C \in
+	R^{m\times{}m}$
 
 ***** PDC basics
 
-       - [[~/cc_overkill/pdf/papers/2001 - Baccala, Sameshima, Partial directed coherence: a new concept in neural structure determination.pdf][2001 - Baccala, Sameshima, Partial directed coherence: a new concept in neural structure determination.pdf]]
-       - [[~/cc_overkill/pdf/books/2014 - SAMESHIMA,BACCALA - Methods in Brain Connectivity Inference through Multivariate Time Series Analysis.pdf][2014 - SAMESHIMA,BACCALA - Methods in Brain Connectivity Inference through Multivariate Time Series Analysis.pdf]]
+      - [[~/cc_overkill/pdf/papers/2001 - Baccala, Sameshima, Partial directed coherence: a new concept in neural structure determination.pdf][2001 - Baccala, Sameshima, Partial directed coherence: a new concept in neural structure determination.pdf]]
+      - [[~/cc_overkill/pdf/books/2014 - SAMESHIMA,BACCALA - Methods in Brain Connectivity Inference through Multivariate Time Series Analysis.pdf][2014 - SAMESHIMA,BACCALA - Methods in Brain Connectivity Inference through Multivariate Time Series Analysis.pdf]]
 
 ****** Normalized frequency
 
@@ -578,13 +640,13 @@ end
       #+END_SRC
 
       NB.: Fields:
-     - =w01=,
-     - =A01=,
-     - =C01=,
-     - =SBC01=,
-     - =FPE01= and
-     - =th01=
-     (in general =*01=) are estimated from the =sigMVAR_pst= signal.
+      - =w01=,
+      - =A01=,
+      - =C01=,
+      - =SBC01=,
+      - =FPE01= and
+      - =th01=
+      (in general =*01=) are estimated from the =sigMVAR_pst= signal.
 
 ***** !fun MVAR timeseries modeling functions
 ****** =cccSim___makeSimSig=
@@ -720,7 +782,7 @@ end
 ***** !opt Checkups
 ****** !opt Gauss wave
 
-      #+BEGIN_SRC emacs-lisp :eval no :tangle no
+       #+BEGIN_SRC emacs-lisp :eval no :tangle no
 
 size(sim_sig_SrcActiv.sigSRC_pst_orig)
 size(sim_sig_SrcActiv.sigSRC_pst)
@@ -759,7 +821,7 @@ figure
 plot(mean(sim_sig_SrcActiv.sigSRC_pst(:,3,:),3))
 
 
-      #+END_SRC
+       #+END_SRC
 
 ****** !opt Basics
 
@@ -824,7 +886,7 @@ set(gcf,'color','w');
 ***** !fun Checkup functions
 ****** =cccSim___rawDispA00=
 
-      #+BEGIN_SRC matlab :session *MATLAB* :eval no :tangle ./fun/cccSim___rawDispA00.m :results silent
+       #+BEGIN_SRC matlab :session *MATLAB* :eval no :tangle ./fun/cccSim___rawDispA00.m :results silent
 
 function cccSim___rawDispA00(A00)
     rawImgSC(A00,8);
@@ -840,17 +902,17 @@ function cccSim___rawDispA00(A00)
     set(gca,'XTick',[0:size(A00,1):size(A00,2)])
 end
 
-      #+END_SRC
+       #+END_SRC
 
 ****** =cccSim___rawPlotA00=
 
-      #+BEGIN_SRC matlab :session *MATLAB* :eval no :tangle ./fun/cccSim___rawPlotA00.m :results silent
+       #+BEGIN_SRC matlab :session *MATLAB* :eval no :tangle ./fun/cccSim___rawPlotA00.m :results silent
 
 function cccSim___rawPlotA00(A00)
     rawPlotPDC(abs(PDC(A00,SETUP.PDC_RES)),SETUP.PDC_RES);
 end
 
-      #+END_SRC
+       #+END_SRC
 
 **** Generation of timeseries for bioelectrical interference noise
 
@@ -860,8 +922,8 @@ end
 
 ***** !run Code
 
-     #+NAME: ./tg_s01_Timeseries___02_IntNoise.m
-     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s01_Timeseries___02_IntNoise.m :results output silent
+      #+NAME: ./tg_s01_Timeseries___02_IntNoise.m
+      #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s01_Timeseries___02_IntNoise.m :results output silent
 
 clearvars sim_sig_IntNoise tmp*
 sim_sig_IntNoise = sim_sig_SrcActiv;
@@ -907,7 +969,7 @@ end
 
 clearvars ii jj kk nn tmp*
 
-     #+END_SRC
+      #+END_SRC
 
 ***** !opt Checkups
 ****** !opt Basics 1
@@ -1025,7 +1087,7 @@ clearvars ii jj kk nn tmp*
 ***** !opt Checkups
 ****** !opt Basics 1
 
-     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle no :results silent
+       #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle no :results silent
 
 whos
 sim_sig_SrcActiv
@@ -1040,11 +1102,11 @@ tmp_varN = {'Timesamples','Signals','Realizations'};
 tmp_rowN = {'sim_sig_SrcActiv.sigSRC_pre','sim_sig_SrcActiv.sigSRC_pst','sim_sig_IntNoise.sigSRC_pre','sim_sig_IntNoise.sigSRC_pst','sim_sig_BcgNoise.sigSRC_pre','sim_sig_BcgNoise.sigSRC_pst'};
 disp(' ');disp(array2table(tmp_arrC,'VariableNames',tmp_varN,'RowNames',tmp_rowN));
 
-     #+END_SRC
+       #+END_SRC
 
 ****** !opt Basics 2
 
-     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle no :results silent
+       #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle no :results silent
 
 jj = 1
 kk = 1
@@ -1054,7 +1116,7 @@ tmp_varN = {'sim_sig_SrcActiv_a','sim_sig_BcgNoise_a'};
 tmp_rowN = tmp_varN;
 disp(' ');disp(array2table(tmp_arrC,'VariableNames',tmp_varN,'RowNames',tmp_rowN));disp('CYBERCRAFT:: This should be negligible')
 
-     #+END_SRC
+       #+END_SRC
 
 ****** !fig MVAR model coefficient matrix (=A00=)
 
@@ -1093,15 +1155,15 @@ subplot(6,1,6);cccSim___rawDispA00(sim_sig_BcgNoise.A01);title('sim\_sig\_BcgNoi
 *** Measurement noise generation
 **** !run Code
 
-    #+NAME: ./tg_s01_Timeseries___04_MesNoise.m
-    #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s01_Timeseries___04_MesNoise.m :results silent
+     #+NAME: ./tg_s01_Timeseries___04_MesNoise.m
+     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s01_Timeseries___04_MesNoise.m :results silent
 
 clearvars sim_sig_MesNoise tmp*
 sim_sig_MesNoise.inf = 'RANDN based signal for measurment noise';
 sim_sig_MesNoise.sigSNS_pre = randn([SETUP.n00,size(sel_ele.chanpos,1),SETUP.K00]);
 sim_sig_MesNoise.sigSNS_pst = randn([SETUP.n00,size(sel_ele.chanpos,1),SETUP.K00]);
 
-    #+END_SRC
+     #+END_SRC
 
 **** !opt Checkups
 
@@ -1126,7 +1188,7 @@ chkSim___tg_s02_PRE___001(SETUP)
 *** !opt Initial checkups
 **** !fig Deep sources as icosahedron642
 
-      #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle no :results silent
+     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle no :results silent
 
 close all
 figure('Color',[1,1,1]);clf;
@@ -1143,11 +1205,11 @@ trisurf(                   ...
 hold on
 ccrender([-150,150],'finish','matte')
 
-      #+END_SRC
+     #+END_SRC
 
 **** !fig Deep sources as thalami (L+R)
 
-      #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle no :results silent
+     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle no :results silent
 
 close all
 figure('Color',[1,1,1]);clf;
@@ -1164,11 +1226,11 @@ trisurf(                   ...
 hold on
 ccrender([-50,50],'finish','matte')
 
-      #+END_SRC
+     #+END_SRC
 
 **** !fig Cortex mesh
 
-      #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle no :results silent
+     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle no :results silent
 
 ft_plot_mesh(                  ...
     sel_atl,                   ...
@@ -1182,11 +1244,11 @@ view(0,90)
 view(90,0)
 view(180,0)
 
-      #+END_SRC
+     #+END_SRC
 
 **** !fig Brain outer mesh
 
-      #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle no :results silent
+     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle no :results silent
 
 close all
 figure('Color',[1,1,1]);clf;
@@ -1198,11 +1260,11 @@ ft_plot_mesh(        ...
     'edgealpha',0.05);
 ccrender([-160,160],'finish','matte')
 
-      #+END_SRC
+     #+END_SRC
 
 **** !fig Skull outer mesh
 
-      #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle no :results silent
+     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle no :results silent
 
 ft_plot_mesh(        ...
     sel_msh.bnd(2),  ...
@@ -1212,11 +1274,11 @@ ft_plot_mesh(        ...
     'edgealpha',0.1);
 ccrender([-160,160],'finish','matte')
 
-      #+END_SRC
+     #+END_SRC
 
 **** !fig Scalp outer mesh
 
-      #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle no :results silent
+     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle no :results silent
 
 ft_plot_mesh(           ...
     sel_msh.bnd(3),     ...
@@ -1226,40 +1288,42 @@ ft_plot_mesh(           ...
     'edgealpha',0.2);
 ccrender([-160,160],'finish','matte')
 
-      #+END_SRC
+     #+END_SRC
 
 **** !fig Electrode positioning
 
-      #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle no :results silent
+     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle no :results silent
 
 stem3( sel_ele.elecpos(:,1), ...
        sel_ele.elecpos(:,2), ...
        sel_ele.elecpos(:,3), ...
        '.m','filled','LineStyle','none','MarkerSize',12);
 
-      #+END_SRC
+     #+END_SRC
 
 **** !fig Electrode labels
 
-      #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle no :results silent
+     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle no :results silent
+
+% for ii=1:size(tmp_elecpos,1),sel_elec00.label{ii,1} = sprintf('Ch%02d',ii);end
 
 text(  sel_ele.elecpos(:,1) * 1.2, ...
        sel_ele.elecpos(:,2) * 1.2, ...
        sel_ele.elecpos(:,3) * 1.2, ...
        sel_ele.label,'Color',[0.5 0.3 0.5],'FontSize',10);
 
-      #+END_SRC
+     #+END_SRC
 
 **** !fig View control
 
-      #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle no :results silent
+     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle no :results silent
 
 view(0,90)
 view(90,0)
 view(180,0)
 view(225,60)
 
-      #+END_SRC
+     #+END_SRC
 
 *** !run ROI random sampling
 **** !run Code
@@ -1270,13 +1334,21 @@ view(225,60)
 clearvars sim_geo_cort ii jj kk nn tmp*
 sim_geo_cort.numROIs = size(sel_atl.Atlas(sel_atl.atl).Scouts,2);
 
-if 0, SETUP.rROI = 0; end;
-
 if SETUP.rROI
+    disp('CC: using random ROI locations')
     sim_geo_cort.lstROIs = randsample([1:sim_geo_cort.numROIs],size(SETUP.SRCS,1));
 else
-    sim_geo_cort.lstROIs = [30 29 56 34 31 51 84 53 83 58 57];
+    disp('CC: using predefined ROI locations')
+    sim_geo_cort.lstROIs = [31 30 34 29 56 51 84 53 83 58 57];
     sim_geo_cort.lstROIs = sim_geo_cort.lstROIs(1:size(SETUP.SRCS,1));
+end
+
+
+if SETUP.rPNT
+    disp('CC: using random source locations')
+else
+    disp('CC: using predefined source locations')
+    sim_geo_cort.lstROIs(1) = 31;
 end
 
      #+END_SRC
@@ -1286,6 +1358,7 @@ end
      #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle no :results silent
 
 SETUP.rROI
+SETUP.rPNT
 
 sim_geo_cort
 sim_geo_cort.lstROIs
@@ -1311,10 +1384,10 @@ end
 *** !run Indices for ROI vertices and triangles ON CORTEX
 **** !run Code
 
-    Select all *vertices* and all *triangles* for each ROI.
+     Select all *vertices* and all *triangles* for each ROI.
 
-    #+NAME: ./tg_s02_Geometry___02_Indices.m
-    #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s02_Geometry___02_Indices.m :results silent
+     #+NAME: ./tg_s02_Geometry___02_Indices.m
+     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s02_Geometry___02_Indices.m :results silent
 
 sim_geo_cort.indROIs = [];
 for ii = 1:length(sim_geo_cort.lstROIs)
@@ -1324,7 +1397,7 @@ for ii = 1:length(sim_geo_cort.lstROIs)
 end
 clearvars ii jj kk nn tmp*
 
-    #+END_SRC
+     #+END_SRC
 
 **** !opt Checkups
 
@@ -1466,8 +1539,8 @@ view(135,45)
 *** !run Coordinates for source position and orientation
 **** !run Code
 
-    #+NAME: ./tg_s02_Geometry___03_Coordinates.m
-    #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s02_Geometry___03_Coordinates.m :results silent
+     #+NAME: ./tg_s02_Geometry___03_Coordinates.m
+     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s02_Geometry___03_Coordinates.m :results silent
 
 sim_geo_cort.distrROIs    = SETUP.SRCS;
 sim_geo_cort.distrROIsSum = sum(SETUP.SRCS,2);
@@ -1479,6 +1552,23 @@ sim_geo_cort.splitSRC = {};
 for ii = 1:length(sim_geo_cort.distrROIsSum)
     sim_geo_cort.splitSRC(ii,:) = mat2cell(sim_geo_cort.bulkSRC{ii},sim_geo_cort.distrROIs(ii,:),1)';
 end
+
+if 0
+    sim_geo_cort.splitSRC(1,1)
+    sim_geo_cort.splitSRC{1,1}
+end
+
+if SETUP.rPNT
+    disp('CC: using random source locations')
+else
+    disp('CC: using predefined source locations')
+    sim_geo_cort.splitSRC{1,1} = [5441;5506;5481;5283;5144;5063;5823;5987;6154;6065;6166;6346;6087;6446;6367;6726;6859;6829;6613;6698;6966;7162;7227;6949;6996;7365;7247;7480];
+    sim_geo_cort.splitSRC{1,1} = sim_geo_cort.splitSRC{1,1}(1:SETUP.SRCS(1,1));
+    if 0
+        sim_geo_cort.splitSRC{1,1}
+    end
+end
+
 sim_geo_cort.mergeSRC = {};
 for ii = 1:3
     sim_geo_cort.mergeSRC{ii} = cat(1,sim_geo_cort.splitSRC{:,ii});
@@ -1495,7 +1585,7 @@ for ii = 1:3
 end
 clearvars ii jj kk nn tmp*
 
-    #+END_SRC
+     #+END_SRC
 
 **** !opt Checkups
 
@@ -1527,8 +1617,8 @@ sim_geo_cort.ori_pert
 *** !run Deep sources
 **** !run Code
 
-    #+NAME: ./tg_s02_Geometry___04_DeepSrc_01.m
-    #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s02_Geometry___04_DeepSrc.m :results silent
+     #+NAME: ./tg_s02_Geometry___04_DeepSrc_01.m
+     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s02_Geometry___04_DeepSrc.m :results silent
 
 clearvars sel_geo_deep ii jj kk ll nn tmp*
 
@@ -1597,8 +1687,8 @@ sim_geo_cort
 *** !run Merge cortex and deep sources
 **** !run Code
 
-    #+NAME: ./tg_s02_Geometry___04_DeepSrc_02.m
-    #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s02_Geometry___04_DeepSrc.m :results silent
+     #+NAME: ./tg_s02_Geometry___04_DeepSrc_02.m
+     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s02_Geometry___04_DeepSrc.m :results silent
 
 sim_geo = sim_geo_cort;
 for ii = 1:3,
@@ -1624,11 +1714,11 @@ sim_geo_cort
 *** !run Perturbation for source position and orientation
 **** !opt Modify perturbation parameters here
 
-    To facilitate *bug tracking* and for *explanatory/illustrative
-    purpose* it might be plausible to modify the perturbation
-    parameters here.
+     To facilitate *bug tracking* and for *explanatory/illustrative
+     purpose* it might be plausible to modify the perturbation
+     parameters here.
 
-    #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle no :results silent
+     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle no :results silent
 
 SETUP.CUBE
 SETUP.CUBE = 30
@@ -1637,12 +1727,12 @@ SETUP.CONE
 SETUP.CONE = pi/16
 SETUP.CONE
 
-    #+END_SRC
+     #+END_SRC
 
 **** !run Code
 
-    #+NAME: ./tg_s02_Geometry___05_Perturbation.m
-    #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s02_Geometry___05_Perturbation.m :results silent
+     #+NAME: ./tg_s02_Geometry___05_Perturbation.m
+     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s02_Geometry___05_Perturbation.m :results silent
 
 for ii = 1:3
     sim_geo.ori_pert{ii} = normr(rawSphToCart(rawCartToSph(sim_geo.ori_orig{ii}) + [SETUP.CONE*0.5*(2*rand(size(sim_geo.ori_pert{ii},1),2)-1),zeros(size(sim_geo.ori_pert{ii},1),1)]));
@@ -1663,17 +1753,17 @@ if SETUP.TELL
 end
 clearvars ii jj kk nn tmp*
 
-    #+END_SRC
+     #+END_SRC
 
-    NOTE 1: The following procedure is applied to the orientation vectors of activity sources:
-    in order to achieve their random perturbation:
-    1. Original orientations are vertex vormal vectors of the triangulation mesh;
-    2. Coordinates are transformed to spherical;
-    3. =SETUP.CONE= is the max perturbation (angle of max rotation) considered
-    4. Multiplied here by random number \in [-1,1];
-    5. Azimuth [TH] and elevation [PHI] are modified by adding the above random numbers;
-    6. Radius is not changed (the added matrix has last column padded with zeros);
-    7. Coordinates are transformed back to the cartesian system.
+     NOTE 1: The following procedure is applied to the orientation vectors of activity sources:
+     in order to achieve their random perturbation:
+     1. Original orientations are vertex vormal vectors of the triangulation mesh;
+     2. Coordinates are transformed to spherical;
+     3. =SETUP.CONE= is the max perturbation (angle of max rotation) considered
+     4. Multiplied here by random number \in [-1,1];
+     5. Azimuth [TH] and elevation [PHI] are modified by adding the above random numbers;
+     6. Radius is not changed (the added matrix has last column padded with zeros);
+     7. Coordinates are transformed back to the cartesian system.
 
 **** !opt Checkups
 
@@ -1832,8 +1922,8 @@ clearvars ii jj kk nn tmp*
 ** DONE [s03] Forward modeling
 *** !run Code
 
-     #+NAME: ./tg_s03_Forward_modeling.m
-     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s03_Forward_modeling.m :results silent
+    #+NAME: ./tg_s03_Forward_modeling.m
+    #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s03_Forward_modeling.m :results silent
 
 clearvars ii jj kk nn tmp*
 for kk = 1:SETUP.K00
@@ -1846,24 +1936,24 @@ for kk = 1:SETUP.K00
 end
 clearvars ii jj kk nn tmp*
 
-     #+END_SRC
+    #+END_SRC
+** DONE [s04] Preparations for both reconstruction and localization
+*** DONE SNRs adjustments
+**** !opt Comments
 
-** DONE [s04] SNRs adjustments
-*** !opt Comments
-
-    We introduced desired SNR by adjusting power for:
+     We introduced desired SNR by adjusting power for:
      - biological interference,
      - background biological activity,
      - measurement noise.
-     In order to allow for evaluation of:
-     - reconstruction accuracy, and
-     - functional dependencies estimation (PDC, DTF, dDTF etc.)
-     we did not change the power of the sources signal!
+       In order to allow for evaluation of:
+       - reconstruction accuracy, and
+       - functional dependencies estimation (PDC, DTF, dDTF etc.)
+       we did not change the power of the sources signal!
 
-*** !run Code
+**** !run Code
 
-    #+NAME: ./tg_s04_SNRs_Adjustment.m
-    #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s04_SNRs_Adjustment.m :results silent
+     #+NAME: ./tg_s04_Preparation___00_SNRs_Adjustment.m
+     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s04_Preparation___00_SNRs_Adjustment.m :results silent
 
 clearvars ii jj kk nn tmp*
 
@@ -1886,11 +1976,11 @@ end
 
 clearvars ii jj kk nn tmp*
 
-    #+END_SRC
+     #+END_SRC
 
-*** !opt Checkups
+**** !opt Checkups
 
-    #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle no :results silent
+     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle no :results silent
 
 whos
 
@@ -1916,10 +2006,9 @@ isequal(sim_sig_AdjSNRs.SrcActivPre,sim_sig_SrcActiv.sigSNS_pre)
 % sim_sig_SrcActiv.sigSNS_pre should remain unchanged after SNR adjustments
 isequal(sim_sig_AdjSNRs.SrcActivPst,sim_sig_SrcActiv.sigSNS_pst)
 
-    #+END_SRC
+     #+END_SRC
 
-** DONE [s05] Spatial filtering
-*** DONE [p01] Preparation
+*** DONE Measured signal and covariance matrices
 **** !opt Initial checkups
 
      #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle no :results silent
@@ -1932,20 +2021,20 @@ whos
 ***** Initialization
 ****** !run Code
 
-       #+NAME: ./tg_s05_Spatial_filtering___01_Preparation.m
-       #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s05_Spatial_filtering___01_Preparation.m :results silent
+       #+NAME: ./tg_s04_Preparation___01_Signal_Covariances.m
+       #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s04_Preparation___01_Signal_Covariances.m :results silent
 
 clearvars ii jj kk nn tmp*
 
        #+END_SRC
 
-***** Measured signal and covariance matrices
+***** Computation
 ****** !run Code
 
-       #+NAME: ./tg_s05_Spatial_filtering___01_Preparation.m
-       #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s05_Spatial_filtering___01_Preparation.m :results silent
+       #+NAME: ./tg_s04_Preparation___01_Signal_Covariances.m
+       #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s04_Preparation___01_Signal_Covariances.m :results silent
 
-clearvars ii jj kk nn tmp*
+% clearvars ii jj kk nn tmp*
 
 % Note: in this and subsequent subsections we aim at following closely notation from the paper.
 
@@ -2001,7 +2090,7 @@ C_SrcInt = pinv(S_SrcInt) - pinv(G_SrcInt);
 C_NL = C_SrcInt(1:size(H_Src,2),1:size(H_Src,2));
 C = pinv(S)-pinv(G);
 
-clear U_H_Int Si_H_Int V_H_Int G_SrcInt S_SrcInt;
+clear U_H_Int Si_H_Int V_H_Int G_SrcInt S_SrcInt C_SrcInt;
 
        #+END_SRC
 
@@ -2120,6 +2209,17 @@ clear ii a k SrcPst Corr_SrcPst IntPst Corr_SrcIntPst Cross_SrcIntPst;
 
        #+END_SRC
 
+**** !opt Checkups
+
+     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle no :results silent
+
+rec_opt
+whos
+
+     #+END_SRC
+
+** DONE [s05] Spatial filtering
+*** DONE Filter preparations
 ***** NL
 
       #+NAME: ./tg_s05_Spatial_filtering___01_Preparation.m
@@ -2130,7 +2230,7 @@ H_SrcInt   = [H_Src H_Int];
 P_NL = [eye(size(H_Src,2)) zeros(size(H_Src,2),size(H_Int,2))];
 
       #+END_SRC
-
+      
 ***** EIG-LCMV
 
       #+NAME: ./tg_s05_Spatial_filtering___01_Preparation.m
@@ -2353,157 +2453,140 @@ clear H_Int_R H_Int_N;
 
        #+END_SRC
 
-**** !opt Checkups
-
-     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle no :results silent
-
-rec_opt
-whos
-
-     #+END_SRC
-
-*** DONE [p02] Filter definitions
+*** DONE Filter definitions
 **** !run Code
 ***** LCMV
 
-     #+NAME: ./tg_s05_Spatial_filtering___02_Definitions.m
-     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s05_Spatial_filtering___02_Definitions.m :results silent
+      #+NAME: ./tg_s05_Spatial_filtering___02_Definitions.m
+      #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s05_Spatial_filtering___02_Definitions.m :results silent
 % note: S and G use only H_Src, as we want to recover only activity of interest, not interference 
 rec_flt.LCMV_R = pinv(S)*H_Src'*pinv(R);
 rec_flt.LCMV_N = pinv(G)*H_Src'*pinv(N);
 
-     #+END_SRC
+      #+END_SRC
 
 ***** NL
 
-     #+NAME: ./tg_s05_Spatial_filtering___02_Definitions.m
-     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s05_Spatial_filtering___02_Definitions.m :results silent
+      #+NAME: ./tg_s05_Spatial_filtering___02_Definitions.m
+      #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s05_Spatial_filtering___02_Definitions.m :results silent
 
 % As proposed in Hui & Leahy 2010
 rec_flt.NL = P_NL*pinv(H_SrcInt'*pinv(R)*H_SrcInt)*H_SrcInt'*pinv(R);
 
-     #+END_SRC
+      #+END_SRC
 
 ***** MMSE
 
-     #+NAME: ./tg_s05_Spatial_filtering___02_Definitions.m
-     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s05_Spatial_filtering___02_Definitions.m :results silent
+      #+NAME: ./tg_s05_Spatial_filtering___02_Definitions.m
+      #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s05_Spatial_filtering___02_Definitions.m :results silent
 
 rec_flt.MMSE = C*H_Src'*pinv(R);
 
-     #+END_SRC
-
-***** MMSE_INT
-
-     #+NAME: ./tg_s05_Spatial_filtering___02_Definitions.m
-     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s05_Spatial_filtering___02_Definitions.m :results silent
-
-rec_flt.MMSE_INT = C_SrcInt(1:size(H_Src,2),:)*H_SrcInt'*pinv(R);
-
-     #+END_SRC
+      #+END_SRC
 
 ***** ZF
 
-     #+NAME: ./tg_s05_Spatial_filtering___02_Definitions.m
-     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s05_Spatial_filtering___02_Definitions.m :results silent
+      #+NAME: ./tg_s05_Spatial_filtering___02_Definitions.m
+      #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s05_Spatial_filtering___02_Definitions.m :results silent
 
 rec_flt.ZF = pinv(H_Src);
 
-     #+END_SRC
+      #+END_SRC
       
 ***** RANDN
 
-     #+NAME: ./tg_s05_Spatial_filtering___02_Definitions.m
-     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s05_Spatial_filtering___02_Definitions.m :results silent
+      #+NAME: ./tg_s05_Spatial_filtering___02_Definitions.m
+      #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s05_Spatial_filtering___02_Definitions.m :results silent
 
 rec_flt.RANDN = randn(size(H_Src'));
 
-     #+END_SRC
+      #+END_SRC
 
 ***** ZEROS
 
-     #+NAME: ./tg_s05_Spatial_filtering___02_Definitions.m
-     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s05_Spatial_filtering___02_Definitions.m :results silent
+      #+NAME: ./tg_s05_Spatial_filtering___02_Definitions.m
+      #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s05_Spatial_filtering___02_Definitions.m :results silent
 
 rec_flt.ZEROS = zeros(size(H_Src'));
 
-     #+END_SRC
+      #+END_SRC
 
 ***** EIG-LCMV
 
-       #+NAME: ./tg_s05_Spatial_filtering___02_Definitions.m
-       #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s05_Spatial_filtering___02_Definitions.m :results silent
+      #+NAME: ./tg_s05_Spatial_filtering___02_Definitions.m
+      #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s05_Spatial_filtering___02_Definitions.m :results silent
 
 rec_flt.EIG_LCMV_R = rec_flt.LCMV_R*P_EIG;
 rec_flt.EIG_LCMV_N = rec_flt.LCMV_N*P_EIG;
 
-       #+END_SRC
+      #+END_SRC
 
 ***** PREWHITENED-LCMV
 
-         #+NAME: ./tg_s05_Spatial_filtering___02_Definitions.m
-         #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s05_Spatial_filtering___02_Definitions.m :results silent
+      #+NAME: ./tg_s05_Spatial_filtering___02_Definitions.m
+      #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s05_Spatial_filtering___02_Definitions.m :results silent
 
 % not applicable in our case as it assumes access to covariance matrix of interference + background noise + measurement noise, whereas in our case N does not contain interference
 
-         #+END_SRC
+      #+END_SRC
 
 ***** sMVP
 
-       #+NAME: ./tg_s05_Spatial_filtering___02_Definitions.m
-       #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s05_Spatial_filtering___02_Definitions.m :results silent
+      #+NAME: ./tg_s05_Spatial_filtering___02_Definitions.m
+      #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s05_Spatial_filtering___02_Definitions.m :results silent
 
 rec_flt.sMVP_MSE = P_sMVP_MSE_opt*rec_flt.LCMV_R;
 rec_flt.sMVP_R = P_sMVP_R_opt*rec_flt.LCMV_R;
 rec_flt.sMVP_N = P_sMVP_N_opt*rec_flt.LCMV_N;
 
-       #+END_SRC
+      #+END_SRC
 
 ***** sMVP_NL
 
-       #+NAME: ./tg_s05_Spatial_filtering___02_Definitions.m
-       #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s05_Spatial_filtering___02_Definitions.m :results silent
+      #+NAME: ./tg_s05_Spatial_filtering___02_Definitions.m
+      #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s05_Spatial_filtering___02_Definitions.m :results silent
 
 rec_flt.sMVP_NL_MSE = P_sMVP_NL_MSE_opt*pinv(P_sMVP_NL_R*H_Src_R)*P_sMVP_NL_R*pinv(sqrtm(R));
 rec_flt.sMVP_NL_R = P_sMVP_NL_R_opt*pinv(P_sMVP_NL_R*H_Src_R)*P_sMVP_NL_R*pinv(sqrtm(R));
 rec_flt.sMVP_NL_N = P_sMVP_NL_N_opt*pinv(P_sMVP_NL_N*H_Src_N)*P_sMVP_NL_N*pinv(sqrtm(N));
 
-       #+END_SRC
+      #+END_SRC
 
 ***** Optional clearing of selected filters
 
-       #+NAME: ./tg_s05_Spatial_filtering___02_Definitions.m
-       #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s05_Spatial_filtering___02_Definitions.m :results silent
+      #+NAME: ./tg_s05_Spatial_filtering___02_Definitions.m
+      #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s05_Spatial_filtering___02_Definitions.m :results silent
 
 if(SETUP.fltREMOVE)
+    rec_flt = rmfield(rec_flt,'ZF');
     rec_flt = rmfield(rec_flt,'RANDN');
     rec_flt = rmfield(rec_flt,'ZEROS');
 end
 
-       #+END_SRC
+      #+END_SRC
 
 ***** Cleanup
 
-     #+NAME: ./tg_s05_Spatial_filtering___02_Definitions.m
-     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s05_Spatial_filtering___02_Definitions.m :results silent
+      #+NAME: ./tg_s05_Spatial_filtering___02_Definitions.m
+      #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s05_Spatial_filtering___02_Definitions.m :results silent
 
 rawFixStrJoin
 
 clearvars R N C C_NL S G P_* H_* jj;
 
-     #+END_SRC
+      #+END_SRC
 
 **** !opt Checkups
 
-       #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle no :results silent
+     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle no :results silent
 
 whos
 rec_flt
 rec_opt.ranks
 
-       #+END_SRC
+     #+END_SRC
 
-*** DONE [p03] Execution
+*** DONE Execution
 **** !run Signal reconstruction
 
      Reconstruct signal in the sources using previously prepared
@@ -2578,13 +2661,160 @@ rec_funDep_PDC
 
       #+END_SRC
 
-** DONE [s06] Error evaluation
+** DONE [s05] Localization
+*** DONE Locallizers preparations
+**** !run Preparations
+     #+NAME: ./tg_s05_Localization___00_Preparations.m
+     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s05_Localization___00_Preparations.m :results silent
+
+       % pre-computed leadfields for source candidates
+       load('./mat/sel_src.mat');    
+
+     #+END_SRC
+*** DONE Locallizers definitions 
+**** !run MAI and MPZ Locallizers
+     #+NAME: ./tg_s05_Localization___01_MAI_and_MPZ_Locallizers.m
+     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s05_Localization___01_MAI_and_MPZ_Locallizers.m :results silent
+
+       structure = sel_src.lfg;
+       % lf is the array of cells containing all leafields within ROI
+       lf = structure.leadfield; 
+       % position of sources
+       pos_Src = sim_lfg_SrcActiv_orig.lfg.pos;
+       [~, pos_Src_ind]=ismember(pos_Src,structure.pos,'rows');
+
+       % Results will be stored in structs with fields: 
+       % leadfield, source positions, localization error, rank selected
+       % 1 = MAI(2011), 2 = MAI(2013), 3 = MPZ(2011), 4 = MPZ(2013)
+       % 5 = MAI_RR_I, 6 = MAI_RR_C, 7 = MPZ_RR_I, 8 = MPZ_RR_C
+       RES = repmat(struct('H',[],'sources',[]),8,1);
+
+       % to be used for the proposed heuristic rank-selection criterion 
+       % leading eigenvalues of R*pinv(N) are equal to those of C*G0+1
+       x = sort(eig(R*pinv(N)),'descend');
+       x = x(1:sum(SETUP.SRCS(:,1)));
+       % percentage of variance explained
+       y = x./sum(x);
+       % percent of explained variance
+       rs_opt = min(find(cumsum(y)>0.8));
+
+       clear x y;      
+
+       for i = 1:sum(SETUP.SRCS(:,1))
+           tic
+           i
+           % for REAL WORLD APPLICABLE activity indices, rank is fixed
+           RES_tmp = repmat({zeros(length(lf),1)}, 1, 8);
+           rs = min([i rs_opt]);
+           
+           for k = 1:8
+               
+               for j = 1:length(lf)
+                   
+                   h_curr = lf{j};
+                   
+                   % we use H obtained for a given index at previous iteration with respect to i, 
+                   % starting with null matrix
+                   h = [RES(k).H h_curr];
+
+                   G = h'*pinv(N)*h;
+                   S = h'*pinv(R)*h;
+                   T = h'*pinv(R)*N*pinv(R)*h;
+                   
+                   [U D ~] = svd(S);            
+                   
+                   MAI_eigenv = sort(real(eig(G*pinv(S))),'descend');
+                   MPZ_eigenv = sort(real(eig(S*pinv(T))),'descend');
+
+                   if ismember(k,[6 8]) & i>rs_opt
+                       % Csq is rank-deficient if h = lf{j} matches previously found sources
+                       Csq = real(sqrtm(pinv(S)-pinv(G)));            
+                       h2 = h*Csq;
+                       
+                       G2 = h2'*pinv(N)*h2;
+                       S2 = h2'*pinv(R)*h2;
+                       T2 = h2'*pinv(R)*N*pinv(R)*h2;
+                       
+                       [U2 D2 ~] = svd(S2);
+                   end
+                   
+                   % REAL-WORLD APPLICABLE family of indices
+                   switch k
+                     case 1
+                       % MAI(2011) index
+                       RES_tmp{k}(j) = sum(MAI_eigenv);
+                     case 2             
+                       % MAI(2013) index
+                       RES_tmp{k}(j) = sum(MAI_eigenv(1:rs));
+                     case 3
+                       % MPZ(2011) index
+                       RES_tmp{k}(j) = sum(MPZ_eigenv);    
+                     case 4
+                       % MPZ(2013) index
+                       RES_tmp{k}(j) = sum(MPZ_eigenv(1:rs));
+                     case 5
+                       % MAI_RR_I index
+                       P = U(:,1:rs)*U(:,1:rs)';
+                       RES_tmp{k}(j) = trace(G*pinv(S)*P);
+                       clear P;
+                     case 6
+                       % MAI_RR_C index
+                       if i<=rs_opt
+                           RES_tmp{k}(j) = RES_tmp{k-1}(j);
+                       elseif i>rs_opt % in this case rs=rs_opt    
+                           P2 = U2(:,1:rs_opt)*U2(:,1:rs_opt)';
+                           RES_tmp{k}(j) = trace(G2*pinv(S2)*P2);
+                           clear P2;
+                       end
+                     case 7
+                       % MPZ_RR_I index
+                       P = U(:,1:rs)*U(:,1:rs)';
+                       RES_tmp{k}(j) = trace(S*pinv(T)*P);
+                       clear P;                       
+                     case 8
+                       % MPZ_RR_C index
+                       if i<=rs_opt
+                           RES_tmp{k}(j) = RES_tmp{k-1}(j);
+                       elseif i>rs_opt % in this case rs=rs_opt        
+                           P2 = U2(:,1:rs_opt)*U2(:,1:rs_opt)';
+                           RES_tmp{k}(j) = trace(S2*pinv(T2)*P2);
+                           clear P2;
+                       end
+                   end
+                   
+                   % explicit clear to emphasize that all matrices 
+                   % are created anew at each iteration for each j and k
+                   clear h_curr h G S T Csq h2 G2 S2 T2 U D U2 D2 P P2;
+                   
+                   % below: end of j = 1:length(lf) loop    
+               end
+
+               [~, w]=max(RES_tmp{k});
+               [dis dis_ind] = pdist2(pos_Src,structure.pos(w,:),'chebychev','Smallest',1);
+
+               % store results
+               RES(k).H = [RES(k).H lf{w}];
+               RES(k).sources(i).candidate_number = w;
+               RES(k).sources(i).rank_opt = rs;
+               RES(k).sources(i).source_discovered = dis_ind;
+               RES(k).sources(i).distance = dis;
+
+               % below: end of k = 1:8 loop
+           end
+           
+           % below: end of i = 1:SETUP.RANK_EIG loop            
+           toc
+       end
+
+       clear structure lf pos_Src;
+     #+END_SRC
+** DONE [s06] Reconstruction error evaluation
 *** !opt Code for testing of source reconstruction error evaluation
 
-     Replace original signal with sine and the reconstructed signals
-     with waves that produce easy to predict error values...
+    Replace original signal with sine and the reconstructed signals
+    with waves that produce easy to predict error values...
 
-     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle no :results silent
+    #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle no :results silent
 
 if 0
     clearvars rec* ii jj kk nn tmp*
@@ -2680,13 +2910,14 @@ size(sim_sig_AdjSNRs.SrcActivPre)
           rec_sigAmp_ErrCorrCf.(tmp_allFields{nn}) = mean(mean(tmp_error));
       end
 
-     #+END_SRC
+    #+END_SRC
 
 *** =Euclid= for MVAR coefficients matrix
 
     #+NAME: ./tg_s06_Error_evaluation.m
     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s06_Error_evaluation.m :results silent
 
+  
       clearvars ii jj kk nn tmp* rec_funDep_A00_ErrMonday rec_funDep_A00_ErrEuclid
       tmp_allFields  = fieldnames(rec_sig);
 
@@ -2694,7 +2925,7 @@ size(sim_sig_AdjSNRs.SrcActivPre)
           rec_funDep_A00_ErrEuclid.(tmp_allFields{nn}) = (norm(rec_funDep_A00.(tmp_allFields{1}) - rec_funDep_A00.(tmp_allFields{nn}),'fro')^2);
       end
 
-     #+END_SRC
+    #+END_SRC
 
 *** =CorrCf= for MVAR coefficient matrix
 
@@ -2732,7 +2963,7 @@ size(sim_sig_AdjSNRs.SrcActivPre)
       end
 
     #+END_SRC
-
+    
 *** =CorrCf= for PDC coefficient matrix
 
     #+NAME: ./tg_s06_Error_evaluation.m
@@ -2807,14 +3038,14 @@ end
 
 **** Checkups
 
-    #+BEGIN_SRC matlab :session *MATLAB* :eval yes :results silent
+     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :results silent
 
 rec_res.table_arrC = [ rec_sigAmp_ErrEuclid_vec,  rec_sigAmp_ErrCorrCf_vec ];
 rec_res.table_varN = {'rec_sigAmp_ErrEuclid_vec','rec_sigAmp_ErrCorrCf_vec'};
 rec_res.table_rowN = fieldnames(rec_sigAmp_ErrEuclid);
 rec_res.table = array2table(rec_res.table_arrC,'VariableNames',rec_res.table_varN,'RowNames',rec_res.table_rowN);
 
-    #+END_SRC
+     #+END_SRC
 
 *** !opt Checkups (RESULTS CAN BE CHECKED HERE)
 
@@ -2949,7 +3180,7 @@ end
     #+END_SRC
 
 ** DONE [s07] BATCH
-
+    
    Single run for tangled matlab-scripts.
 
 *** [p00] RUN (this is the one for single simulations run)
@@ -2958,48 +3189,59 @@ end
 
     *NB: before running the code below remember to tangle code blocks
     after any modifications !!!*
-
+    
     #+NAME: ./tg_s07_BATCH___00_RUN.m
     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s07_BATCH___00_RUN.m :results silent
 
-if exist('fPath'), cd(fPath); else, try, cd('~/supFunSim/'); catch, warningMessage = 'Problem encoutered while trying to change working directory to ''~/supFunSim/''.'; uiwait(msgbox(warningMessage)); warning(warningMessage); end; end; disp(['CYBERCRAFT:: pwd is: ',pwd])
+      % if exist('fPath'), cd(fPath); else, try, cd('~/supFunSim/'); catch, warningMessage = 'Problem encoutered while trying to change working directory to ''~/supFunSim/''.'; end; end; disp(['CYBERCRAFT:: pwd is: ',pwd])
 
-run('./tg_s07_BATCH___01_Prelude.m'); whos
-SETUP
-chkSim___tg_s01_PRE___001(SETUP);
-chkSim___tg_s01_PRE___000_PARSE_SETUP(SETUP,sel_atl);
-run('./tg_s07_BATCH___02_Signals.m'); whos
+      run('./tg_s07_BATCH___01_Prelude.m'); whos
+      SETUP
+      chkSim___tg_s01_PRE___001(SETUP);
+      chkSim___tg_s01_PRE___000_PARSE_SETUP(SETUP,sel_atl);
+      run('./tg_s07_BATCH___02_Signals.m'); whos
+      run('./tg_s07_BATCH___03_Leadfields.m'); whos
 
-% if BcgNoise ( biological background  noise) is to be white Gaussian,
-% then please uncomment the following two lines.
-% sim_sig_BcgNoise.sigSRC_pre = randn(size(sim_sig_BcgNoise.sigSRC_pre));
-% sim_sig_BcgNoise.sigSRC_pst = randn(size(sim_sig_BcgNoise.sigSRC_pst));
+      % if BcgNoise (biological background  noise) is to be white Gaussian,
+      % then please uncomment the following two lines. 
+      % sim_sig_BcgNoise.sigSRC_pre = randn(size(sim_sig_BcgNoise.sigSRC_pre));
+      % sim_sig_BcgNoise.sigSRC_pst = randn(size(sim_sig_BcgNoise.sigSRC_pst));
+      % if one wishes the biological noise on sensors to be white Gaussian
+      % sim_sig_BcgNoise.sigSNS_pre = randn(size(sim_sig_BcgNoise.sigSNS_pre));
+      % sim_sig_BcgNoise.sigSNS_pst = randn(size(sim_sig_BcgNoise.sigSNS_pst));
 
-run('./tg_s07_BATCH___03_Leadfields.m'); whos
+      % rawImgSC(squareform(pdist(sim_lfg_SrcActiv_orig.lfg.pos,'euclidean')))
 
-% if one wishes the biological noise on sensors to be white Gaussian
-% sim_sig_BcgNoise.sigSNS_pre = randn(size(sim_sig_BcgNoise.sigSNS_pre));
-% sim_sig_BcgNoise.sigSNS_pst = randn(size(sim_sig_BcgNoise.sigSNS_pst));
+      run('./tg_s07_BATCH___04_Preparations.m');    whos
 
-if 1, SETUP.SINR = 15; end
-if 1, SETUP.SBNR = 15; end
-if 1, SETUP.SMNR = 15; end
+      switch SETUP.supSwitch
+        case {'rec'}
 
-run('./tg_s07_BATCH___04_SNRs.m');    whos
-run('./tg_s07_BATCH___05_Filters.m'); whos
+          % Reconstruction
+          disp('Reconstruction')
+          run('./tg_s07_BATCH___05_Filters.m'); whos
 
-% Check the results
-sortrows(rec_res.table,'rec_sigAmp_ErrEuclid_vec')
-sortrows(rec_res.table,'rec_sigAmp_ErrCorrCf_vec','descend')
+          % Check the results
+          sortrows(rec_res.table,'rec_sigAmp_ErrEuclid_vec')
+          sortrows(rec_res.table,'rec_sigAmp_ErrCorrCf_vec','descend')
+          sortrows(rec_res.table,'rec_funDep_A00_ErrEuclid_vec')
+          sortrows(rec_res.table,'rec_funDep_A00_ErrCorrCf_vec','descend')
+          sortrows(rec_res.table,'rec_funDep_PDC_ErrEuclid_vec')
+          sortrows(rec_res.table,'rec_funDep_PDC_ErrCorrCf_vec','descend')
+          rec_opt.ranks
 
-sortrows(rec_res.table,'rec_funDep_A00_ErrEuclid_vec')
-sortrows(rec_res.table,'rec_funDep_A00_ErrCorrCf_vec','descend')
-sortrows(rec_res.table,'rec_funDep_PDC_ErrEuclid_vec')
-sortrows(rec_res.table,'rec_funDep_PDC_ErrCorrCf_vec','descend')
-rec_opt.ranks
+        case {'loc'}
+
+          % Localization
+          disp('Localization')
+          run('./tg_s07_BATCH___05_Localizers.m'); whos
+
+        otherwise
+          warning('Unexpected supSwitch value. No action taken, only data generated.')
+      end
 
     #+END_SRC
-
+    
 **** !opt Checkups
 
      After execution of =tg_s07_BATCH___02_Signals.m= the generated
@@ -3076,80 +3318,74 @@ sim_sig_BcgNoise.sigSRC_pst = sim_sig_BcgNoise.sigSRC_pre
     *explanatory/illustrative purpose*.  Please modify simulation
     settings only in this section.
 
-   #+NAME: ./tg_s07_BATCH___01_Prelude.m
-   #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s07_BATCH___01_Prelude.m :results silent :var fPath = (file-name-directory (or load-file-name buffer-file-name))
+    #+NAME: ./tg_s07_BATCH___01_Prelude.m
+    #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s07_BATCH___01_Prelude.m :results silent :var fPath = (file-name-directory (or load-file-name buffer-file-name))
 
-% Tidy up and change working directory.
-clc; close all;clearvars('-except','fPath');
-if exist('fPath'),cd(fPath);else,try,cd('~/cc_overkill/git/supFunSim');catch,cd('~/supFunSim');end;end;
-clear all;
-close all;
-clc;
+     % Tidy up and change working directory.
+     clc; close all;clearvars('-except','fPath');
+     if exist('fPath'),cd(fPath);else,try,cd('~/cc_overkill/git/supFunSim');catch,cd('~/supFunSim');end;end;
+     clear all;
+     close all;
+     clc;
 
-run('./tg_s00_Prelude___01_Simulations_main_setup.m')
-run('./tg_s00_Prelude___02_SNR_Adjustment.m')
+     run('./tg_s00_Prelude___01_Simulations_main_setup.m')
+     run('./tg_s00_Prelude___02_SNR_Adjustments.m')
 
-% Rows of SETUP.SRCS reppresent ROIs.
-% Cols of SETUP.SRCS represent SrcActiv, IntNoise and BcgNoise, respectively.
-SETUP.SRCS   = [];
-SETUP.SRCS   = [ SETUP.SRCS; 4 3 0 ];
-SETUP.SRCS   = [ SETUP.SRCS; 3 3 1 ];
-SETUP.SRCS   = [ SETUP.SRCS; 2 3 0 ];
-SETUP.SRCS   = [ SETUP.SRCS; 2 3 2 ];
-SETUP.SRCS   = [ SETUP.SRCS; 2 3 0 ];
-SETUP.SRCS   = [ SETUP.SRCS; 0 3 0 ];
-SETUP.SRCS   = [ SETUP.SRCS; 0 3 0 ];
-SETUP.SRCS   = [ SETUP.SRCS; 0 3 2 ];
-SETUP.SRCS   = [ SETUP.SRCS; 0 3 2 ];
-SETUP.DEEP   = [             0 0 20 ]; % deep sources
+     % Rows of SETUP.SRCS reppresent ROIs.
+     % Cols of SETUP.SRCS represent SrcActiv, IntNoise and BcgNoise, respectively.
+     SETUP.rROI   = logical(1);       % random (1) or predefined (0) ROIs
+     SETUP.rPNT   = logical(0);       % random (1) or predefined (0) candidate points for source locations: if 0, 
+				      % number of sources as in SETUP.SRCS(1,1) will be fixed and in close locations
+     SETUP.SRCS   = []; % Cortical sources (avoid placing more than 10 sources in single ROI)
+     SETUP.SRCS   = [ SETUP.SRCS;  3  0  3 ];
+     SETUP.SRCS   = [ SETUP.SRCS;  3  0  3 ];
+     SETUP.SRCS   = [ SETUP.SRCS;  3  1  3 ];
+     SETUP.SRCS   = [ SETUP.SRCS;  0  4  3 ];
+     SETUP.SRCS   = [ SETUP.SRCS;  0  4  3 ];
+     SETUP.SRCS   = [ SETUP.SRCS;  0  4  3 ];
+     SETUP.SRCS   = [ SETUP.SRCS;  0  4  3 ];
+     SETUP.SRCS   = [ SETUP.SRCS;  0  0  3 ];
+     SETUP.SRCS   = [ SETUP.SRCS;  0  0  3 ];
+     SETUP.SRCS   = [ SETUP.SRCS;  0  0  3 ];
+     SETUP.DEEP   = [              0  1  6 ]; % deep sources
 
-SETUP.ERPs   = 0;       % Add ERPs (timelocked activity)
+     SETUP.ERPs   = 0;       % Add ERPs (timelocked activity)
 
-SETUP.rROI   = 1;       % random (1) or predefined (0) ROIs
+     % Basic setting s for sources and noise.
+     SETUP.n00    = 500;     % number of time samples per trial
+     SETUP.K00    = 1;       % number of independent realizations of signal and noise based on generated MVAR model
+			     % note: covariance matrix R of observed signal and noise covariance matrix N are
+			     % estimated from samples originating from all realizations of signal and noise
+     SETUP.RANK_EIG = sum(SETUP.SRCS(:,1)); % rank of EIG-LCMV filter: set to number of active sources
+     SETUP.fltREMOVE = 1;    % to keep (0) or remove (1) selected filters
+     SETUP.SHOWori = 0; % to show (1) or do not show (0) Original and Dummy signals on Figures
+     SETUP.IntLfgRANK = round(0.3*sum(SETUP.SRCS(:,2))); % rank of patch-constrained reduced-rank leadfield
+     SETUP.supSwitch = 'loc'; % 'rec': run reconstruction of sources activity, 'loc': find active sources
 
+     SETUP.SINR           = 0;     % signal to interference noise power ratio expressed in dB (both measured on electrode level)
+     SETUP.SBNR           = 0;    % signal to biological noise power ratio expressed in dB (both measured on electrode level)
+     SETUP.SMNR           = 0;    % signal to measurment noise power ratio expressed in dB (both measured on electrode level)
+     SETUP.WhtNoiseAddFlg = 1;     % white noise admixture in biological noise interference noise (FLAG)
+     SETUP.WhtNoiseAddSNR = 3;     % SNR of BcgNoise and WhiNo (dB)
+     SETUP.SigPre = 0;   SETUP.IntPre = 0;   SETUP.BcgPre = 1;   SETUP.MesPre = 1; % final signal components for pre-interval  (use zero or one for signal, interference noise, biological noise, measurement noise)
+     SETUP.SigPst = 1;   SETUP.IntPst = 1;   SETUP.BcgPst = 1;   SETUP.MesPst = 1; % final signal components for post-interval (as above)
 
-% Basic setting s for sources and noise.
-SETUP.n00    = 500;     % number of time samples per trial
-SETUP.K00    = 50;      % number of independent realizations of signal and noise based on generated MVAR model
-SETUP.P00    = 6;       % order of the MVAR model used to generate time-courses for signal of interest
-SETUP.FRAC   = 0.20;    % proportion of ones to zeros in off-diagonal elements of the MVAR coefficients masking array
-SETUP.STAB   = 0.99;    % MVAR stability limit for MVAR eigenvalues (less than 1.0 results in more stable model producing more stationary signals)
-SETUP.RNG    = [0,2.8]; % range for pseudo-random sampling of eigenvalues for MVAR coefficients range
+     % For localization, the default is to consider random locations of ROI with some fixed candidate points such that 
+     % SETUP.SRCS(1,1) of them are in close locations; additionally, no interfering sources are considered
+     % in the localization model. You may comment out the 'if' section below to experiment with other settings.
+     if(SETUP.supSwitch == 'loc') 
+	 SETUP.rROI   = logical(1);       % random (1) or predefined (0) ROIs
+	 SETUP.rPNT   = logical(0);       % random (1) or predefined (0) candidate points for source locations: if 0, 
+					  % number of sources as in SETUP.SRCS(1,1) will be fixed and in close locations
+	 SETUP.SigPre = 0;   SETUP.IntPre = 0;   SETUP.BcgPre = 1;   SETUP.MesPre = 1; % final signal components for pre-interval  (use zero or one for signal, interference noise, biological noise, measurement noise)
+	 SETUP.SigPst = 1;   SETUP.IntPst = 0;   SETUP.BcgPst = 1;   SETUP.MesPst = 1; % final signal components for post-interval (as above)
+     end
 
-% Settings controlling how informative the code execution should be.
-% By default most of the output text, plot, checkup and other features is turned off for the batch simulations!!!
-SETUP.ITER   = 5e5;     % iterations limit for MVAR pseudo-random sampling and stability verification
-SETUP.PDC_RES = [0:0.01:0.5]; % resolution vector for normalized PDC estimation
-SETUP.TELL   = 0;       % provide additional comments during code execution ("tell me more")
-SETUP.PLOT   = 0;       % plot figures during the intermediate stages
-SETUP.SCRN   = get(0,'MonitorPositions'); % get screens positions
-SETUP.DISP   = SETUP.SCRN(end,:);        % force figures to be displayed on (3dr) screenscreen
-
-% Settings for seed selection
-tmp_shoudSeedBeFixed = 0;
-if tmp_shoudSeedBeFixed,SETUP.SEED = rng(1964);else,SETUP.SEED = rng(round(1e3*randn()^2*sum(clock)));end
-clearvars ii jj kk nn tmp*
-
-% OK
-SETUP.RANK_EIG = sum(SETUP.SRCS(:,1)); % rank of EIG-LCMV filter: set to number of active sources
-SETUP.fltREMOVE = 1; % to keep (0) or remove (1) selected filters
-SETUP.SHOWori = 0; % to show (1) or do not show (0) Original and Dummy signals on Figures
-SETUP.IntLfgRANK = round(0.3*sum(SETUP.SRCS(:,2))); % rank of patch-constrained reduced-rank leadfield
-
-% Leadfields perturbation settings.
-SETUP.CUBE           = 20;    % perturbation of the leadfields based on the shift of source position within a cube of given edge length (centered at the original leadfields positions)
-SETUP.CONE           = pi/32; % perturbation of the leadfields based on the rotation of source orientation (azimuth TH, elevation PHI)
-SETUP.H_Src_pert     = 0;     % use original (0) or perturbed (1) leadfield for signal reconstruction
-SETUP.H_Int_pert     = 0;     % use original (0) or perturbed (1) leadfield for nulling constrains
-SETUP.SINR           = 0;     % signal to interference noise power ratio expressed in dB (both measured on electrode level)
-SETUP.SBNR           = 0;     % signal to biological noise power ratio expressed in dB (both measured on electrode level)
-SETUP.SMNR           = 20;    % signal to measurment noise power ratio expressed in dB (both measured on electrode level)
-SETUP.WhtNoiseAddFlg = 1;     % white noise admixture in biological noise interference noise (FLAG)
-SETUP.WhtNoiseAddSNR = 3;     % SNR of BcgNoise and WhiNo (dB)
-
-% Components of the final signals for "PRE" and "POST" portion.
-SETUP.SigPre = 0;   SETUP.IntPre = 0;   SETUP.BcgPre = 1;   SETUP.MesPre = 1; % final signal components for pre-interval  (use zero or one for signal, interference noise, biological noise, measurement noise)
-SETUP.SigPst = 1;   SETUP.IntPst = 1;   SETUP.BcgPst = 1;   SETUP.MesPst = 1; % final signal components for post-interval (as above)
+     if SETUP.rPNT
+	 disp('CC: using random source locations')
+     else
+	 disp('CC: using predefined source locations')
+     end
 
     #+END_SRC
 
@@ -3174,8 +3410,8 @@ run('./tg_s01_Timeseries___04_MesNoise.m')
 
 *** [p03] Leadfields
 
-   #+NAME: ./tg_s07_BATCH___03_Leadfields.m
-   #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s07_BATCH___03_Leadfields.m :results silent
+    #+NAME: ./tg_s07_BATCH___03_Leadfields.m
+    #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s07_BATCH___03_Leadfields.m :results silent
 
 run('./tg_s02_Geometry___01_RandSamp.m')
 run('./tg_s02_Geometry___02_Indices.m')
@@ -3187,19 +3423,21 @@ run('./tg_s03_Forward_modeling.m')
 
     #+END_SRC
 
-*** [p04] SNRs
+*** [p04] Preparations
 
-   #+NAME: ./tg_s07_BATCH___04_SNRs.m
-   #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s07_BATCH___04_SNRs.m :results silent
+    #+NAME: ./tg_s07_BATCH___04_Preparations.m
+    #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s07_BATCH___04_Preparations.m :results silent
 
-run('./tg_s04_SNRs_Adjustment.m')
+run('./tg_s04_Preparation___00_SNRs_Adjustment.m')
+run('./tg_s04_Preparation___01_Signal_Covariances.m')
+
 
     #+END_SRC
-
+    
 *** [p05] Filters
 
-   #+NAME: ./tg_s07_BATCH___05_Filters.m
-   #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s07_BATCH___05_Filters.m :results silent
+    #+NAME: ./tg_s07_BATCH___05_Filters.m
+    #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s07_BATCH___05_Filters.m :results silent
 
 run('./tg_s05_Spatial_filtering___01_Preparation.m')
 run('./tg_s05_Spatial_filtering___02_Definitions.m')
@@ -3208,175 +3446,390 @@ run('./tg_s06_Error_evaluation.m')
 
     #+END_SRC
 
-** DONE [s08] THE BIG LOOP
+*** [p05] Localizers
+    
+    #+NAME: ./tg_s07_BATCH___05_Localizers.m
+    #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s07_BATCH___05_Localizers.m :results silent
+
+      run('./tg_s05_Localization___00_Preparations.m')
+      run('./tg_s05_Localization___01_MAI_and_MPZ_Locallizers.m')
+
+    #+END_SRC
+    
+** DONE [s08] LOOP
 
    Multiple runs for tangled matlab-scripts.
 
-*** [p00] RUN all and visualize errors
+*** [p00] RUN All
+**** Execute loop
 
-    - Simulation settings can be modified in:
-      - the code block below
-      - [[id:6718d735-94d9-48ae-ae42-1e9f3b3e0799][{p01} Prelude (with *optional settings overwrite*)]], above
-      -
+     - Simulation settings can be modified in:
+     - [[*%5Bs00%5D%20Prelude][{s00} Prelude]]
+     - [[id:6718d735-94d9-48ae-ae42-1e9f3b3e0799][Prelude (with *optional settings overwrite*)]], above
+     - the code block below
 
-   #+NAME: ./tg_s08_LOOP___00_RUN.m
-   #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s08_LOOP___00_RUN.m :results silent
+     #+NAME: ./tg_s08_LOOP___00_RUN.m
+     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s08_LOOP___00_RUN.m :results silent
 
-     % LOOP.table_arrC_avgSimCount contains simulation results averaged over simulation runs set in LOOP.totSimCount. The dimensions of LOOP.table_arrC_avgSimCount are filters x error_types x SNRs. Similarly, LOOP.table_arrC_stdSimCount contains standard deviations of simulation results averaged over simulation runs. 
+    if exist('fPath'), cd(fPath); else, try, cd('~/supFunSim/'); catch, warningMessage = 'Problem encoutered while trying to change working directory to ''~/supFunSim/''.'; end; end; disp(['CYBERCRAFT:: pwd is: ',pwd])
 
-     if exist('fPath'), cd(fPath); else, try, cd('~/supFunSim/'); catch, warningMessage = 'Problem encoutered while trying to change working directory to ''~/supFunSim/''.'; uiwait(msgbox(warningMessage)); warning(warningMessage); end; end; disp(['CYBERCRAFT:: pwd is: ',pwd])
+    clearvars ii jj kk nn tmp* LOOP* Loop*;
+    run('./tg_s07_BATCH___01_Prelude.m');
+    SETUP
 
-     clearvars ii jj kk nn tmp* LOOP* Loop*;
-     run('./tg_s07_BATCH___01_Prelude.m');
-     SETUP
+    % Get some details for simulation output filename (*.mat file)
+    LOOP.DATE = datestr(now,'yyyymmdd_HHMMSS');
+    LOOP.NAME = tempname; [~, LOOP.NAME] = fileparts(LOOP.NAME); % simulation unique name
 
-     % Get some details for simulation output filename (*.mat file)
-     LOOP.DATE = datestr(now,'yyyymmdd_HHMMSS');
-     LOOP.NAME = tempname; [~, LOOP.NAME] = fileparts(LOOP.NAME); % simulation unique name
+    % Number of simulation runs for each SNRs combination
+    LOOP.totSimCount = 10;
+    LOOP.rngSimCount = 1:LOOP.totSimCount;
 
-     % Number of simulation runs for each SNRs combination
-     LOOP.totSimCount = 100;
-     LOOP.rngSimCount = 1:LOOP.totSimCount;
+    % Range of SNRs 
+    LOOP.rngMesNoise = 0;
+    LOOP.rngBcgNoise = [-10:10:10];
+    LOOP.rngIntNoise = 0;
 
-     % Range of SNRs (defaults are consequently [20], [0] and [0,10,20])
-     LOOP.rngMesNoise = 10;
-     LOOP.rngBcgNoise = 0;
-     LOOP.rngIntNoise = [0:5:10];
+    LOOP
+    SETUP
 
-     LOOP
-     SETUP
+    run('./tg_s08_LOOP___01_Main_LOOP.m'); whos
 
-     run('./tg_s08_LOOP___01_Main_LOOP.m'); whos
+    switch SETUP.supSwitch
+      case {'rec'}
 
-     LOOP
-     LOOP.table_varN'
-     LOOP.table_rowN
-     size(LOOP.table_arrC)
+	run('./tg_s08_Loop_Reconstruction_Plot___02_.m')
 
-     % results are averaged over simulation runs
-     LOOP.table_arrC_avgSimCount = squeeze(mean(LOOP.table_arrC,3))
-     LOOP.table_arrC_stdSimCount = squeeze(std(LOOP.table_arrC,[],3))
-     size(LOOP.table_arrC_avgSimCount)
+      case {'loc'}
 
-     % PLOT THE RESULTS
-     mySave = ['./res___',LOOP.DATE,'___',LOOP.NAME,'___',datestr(now,'yyyymmdd_HHMMSS')];
-     save(mySave)
-     LOOP
+	run('./tg_s08_Loop_Localization_Plot___02_.m')
 
-     close all
-     for ii = 1:length(LOOP.table_varN)
-         LOOP.table_varN'
-         tmp_pickVar = ii;
-         disp(LOOP.table_varN(tmp_pickVar))
+      otherwise
+	warning('Unexpected supSwitch value. No action taken, only data generated.')
+    end
+     #+END_SRC
+**** Extract and visualize errors
+***** Reconstruction
+      #+NAME: ./tg_s08_Loop_Reconstruction_Plot___02_.m
+      #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s08_Loop_Reconstruction_Plot___02_.m :results silent
 
-         TMP_res.table_arrC = squeeze(LOOP.table_arrC_avgSimCount(:,tmp_pickVar,:))
-         TMP_res.table_varN = strrep(strrep(strsplit(num2str(LOOP.(LOOP.NamNoise),'%+d ')),'-','n'),'+','p')
-         TMP_res.table_rowN = LOOP.table_rowN
-         TMP_res.table = array2table(TMP_res.table_arrC,'VariableNames',TMP_res.table_varN,'RowNames',TMP_res.table_rowN);
-         sortrows(TMP_res.table,1)
+       LOOP
+       LOOP.table_varN'
+       LOOP.table_rowN
+       size(LOOP.table_arrC)
 
-         figure('Name',[LOOP.table_varN{tmp_pickVar},' for ',LOOP.NamNoise,' in ',num2str(LOOP.(LOOP.NamNoise),'%+d ')])
-         bar(TMP_res.table_arrC)
-         set(gca, 'XTick', 1:length(TMP_res.table_rowN), 'XTickLabel', strrep(TMP_res.table_rowN,'_','\_'));
-         h1 = legend(strsplit(num2str(LOOP.(LOOP.NamNoise),'%+d ')))
-         myTitle = strrep([LOOP.table_varN{tmp_pickVar},' for ',LOOP.NamNoise,' in ',num2str(LOOP.(LOOP.NamNoise),'%+d ')],'_','\_');
-         % title(myTitle)
-         myName = ['./fig/',LOOP.DATE,'___',LOOP.NAME,'___fig_',num2str(ii),'___',strrep(strrep(myTitle,'\',''),' ','_')];
+       LOOP.table_arrC_avgSimCount = squeeze(mean(LOOP.table_arrC,3))
+       LOOP.table_arrC_stdSimCount = squeeze(std(LOOP.table_arrC,[],3))
+       size(LOOP.table_arrC_avgSimCount)
 
-         v1 = get(h1,'title')
-         set(v1,'string','SINR')
+       % SAVE THE RESULTS
+       mySave = ['./res___',LOOP.DATE,'___',LOOP.NAME,'___',datestr(now,'yyyymmdd_HHMMSS')];
+       save(mySave)
+       LOOP
+       % remove done filters from plot (for good)
+       myRem = not(ismember(LOOP.table_rowN,{'ZF','Dummy','ZEROS'}))
+       LOOP.table_rowN = LOOP.table_rowN(myRem,:)
+       LOOP.table_arrC_avgSimCount = LOOP.table_arrC_avgSimCount(myRem,:,:)
+       LOOP.table_arrC_stdSimCount = LOOP.table_arrC_stdSimCount(myRem,:,:)
+       LOOP.table_arrC = LOOP.table_arrC(myRem,:,:,:,:,:)
 
-         set(gcf, 'PaperUnits', 'centimeters')
-         set(gcf, 'PaperOrientation', 'portrait')
-         set(gcf, 'PaperSize', [20, 20])
-         set(gcf, 'Position', [100, 100, 800, 750])
-         legend('Location','northeastoutside')
-         xtickangle(45)
+       close all
+       for ii = 1:length(LOOP.table_varN)
+           LOOP.table_varN'
+           tmp_pickVar = ii;
+           disp(LOOP.table_varN(tmp_pickVar))
 
-         savefig(gcf,myName,'compact')
-         savefig(gcf,myName)
-         saveas(gcf,myName,'pdf')
-     end
+           TMP_res.table_arrC = squeeze(LOOP.table_arrC_avgSimCount(:,tmp_pickVar,:))
+           TMP_res.table_varN = strrep(strrep(strsplit(num2str(LOOP.(LOOP.NamNoise),'%+d ')),'-','n'),'+','p')
+           TMP_res.table_rowN = LOOP.table_rowN
+           TMP_res.table = array2table(TMP_res.table_arrC,'VariableNames',TMP_res.table_varN,'RowNames',TMP_res.table_rowN);
+           sortrows(TMP_res.table,1)
 
-   #+END_SRC
+           figure('Name',[LOOP.table_varN{tmp_pickVar},' for ',LOOP.NamNoise,' in ',num2str(LOOP.(LOOP.NamNoise),'%+d ')])
+           bar(TMP_res.table_arrC)
+           set(gca, 'XTick', 1:length(TMP_res.table_rowN), 'XTickLabel', strrep(TMP_res.table_rowN,'_','\_'));
+           h1 = legend(strsplit(num2str(LOOP.(LOOP.NamNoise),'%+d ')))
+           myTitle = strrep([LOOP.table_varN{tmp_pickVar},' for ',LOOP.NamNoise,' in ',num2str(LOOP.(LOOP.NamNoise),'%+d ')],'_','\_');
+           % title(myTitle)
+           myName = ['./fig/',LOOP.DATE,'___',LOOP.NAME,'___fig_',num2str(ii),'___',strrep(strrep(myTitle,'\',''),' ','_')];
 
+           v1 = get(h1,'title')
+
+           % fix me: it does not have to be SINR
+           set(v1,'string','SINR')
+
+           set(gcf, 'PaperUnits', 'centimeters')
+           set(gcf, 'PaperOrientation', 'portrait')
+           set(gcf, 'PaperSize', [20, 20])
+           set(gcf, 'Position', [100, 100, 800, 750])
+           legend('Location','northeastoutside')
+           xtickangle(45)
+
+           savefig(gcf,myName,'compact')
+           savefig(gcf,myName)
+           saveas(gcf,myName,'pdf')
+       end
+
+      #+END_SRC
+***** Localization
+      #+NAME: ./tg_s08_Loop_Localization_Plot___02_.m
+      #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s08_Loop_Localization_Plot___02_.m :results silent
+
+	LOOP
+
+	% USED FOR SAVING FIGURES
+	myName = ['./fig___',LOOP.DATE,'___',LOOP.NAME,'___',datestr(now,'yyyymmdd_HHMMSS')];
+
+	% use LOOP.RES.ITERATION{x}{y}(z) to access results struct for 
+	% z-th activity index (z=1,2,...,8 with z=1 for MAI(2011) etc., as defined in !run MAI and MPZ Locallizers) 
+	% y-th level of SNR of type considered (interference, biological, measurement)
+	% x-th iteration of the experiment
+
+	% XRANK is an array of size |x| by |y|, representing ranks selected for reduced-rank indices
+	XRANK=zeros(LOOP.totSimCount,length(LOOP.(LOOP.NamNoise)));
+
+	% number of simulation runs
+	for i=1:LOOP.totSimCount
+	    % number of levels of SNR
+	    for j=1:length(LOOP.(LOOP.NamNoise))
+		XRANK(i,j)=max([LOOP.RES.ITERATION{i}{j}(1).sources.rank_opt]);
+	    end
+	end
+
+	% XRES is an array of size |x| by |y| by |z| by |#sources|, representing errors for each source
+	% found using iterative procedure
+	XRES=zeros(LOOP.totSimCount,length(LOOP.(LOOP.NamNoise)),8,sum(SETUP.SRCS(:,1)));
+
+	% number of simulation runs
+	for i=1:LOOP.totSimCount
+	    % number of levels of SNR
+	    for j=1:length(LOOP.(LOOP.NamNoise))
+		% number of activity indices
+		for k=1:8
+		    XRES(i,j,k,:)=[LOOP.RES.ITERATION{i}{j}(k).sources.distance]';
+		end 
+	    end 
+	end
+
+	% RRES is same like XRES, with the trailing few sources considered
+	RRES=XRES(:,:,:,end-1:end);
+
+	% |x| by |y| by |z| array, with last dimension representing mean of errors across sources discovered
+	XRES_s = mean(XRES,4);
+	RRES_s = mean(RRES,4);
+
+	% |y| by |z| matrix, with entries representing averaged mean error and its std across experiment repetitions
+	XRES_sa = squeeze(mean(XRES_s,1));
+	XRES_sstd = squeeze(std(XRES_s,1));
+	RRES_sa = squeeze(mean(RRES_s,1));
+	RRES_sstd = squeeze(std(RRES_s,1));
+
+	% change order of and remove some activity indices as:
+	% 1 = MAI(2011), 2 = MAI(2013), 3 = MAI_RR_I
+	% 4 = MPZ(2011), 5 = MPZ(2013), 6 = MPZ_RR_I
+	XRES_s = XRES_s(:,:,[1 2 5 3 4 7]);
+	RRES_s = RRES_s(:,:,[1 2 5 3 4 7]);
+
+	XRES_sa = XRES_sa(:,[1 2 5 3 4 7]);
+	XRES_sstd = XRES_sstd(:,[1 2 5 3 4 7]);
+
+	RRES_sa = RRES_sa(:,[1 2 5 3 4 7]);
+	RRES_sstd = RRES_sstd(:,[1 2 5 3 4 7]);
+
+	% Mann-Whitney U-test to check whether proposed activity indices achieve 
+	% significantly lower average localization error
+
+	% XRES_U and RRES_U are |y| by 4 (# of comparisons) storing resulting p-values of performed Mann-Whitney U test
+	XRES_U=zeros(length(LOOP.(LOOP.NamNoise)),4);
+	RRES_U=zeros(length(LOOP.(LOOP.NamNoise)),4);
+
+	for j=1:length(LOOP.(LOOP.NamNoise))
+	    XRES_U(j,1)=ranksum(XRES_s(:,j,1),XRES_s(:,j,3),'tail','right');
+	    XRES_U(j,2)=ranksum(XRES_s(:,j,2),XRES_s(:,j,3),'tail','right');
+	    XRES_U(j,3)=ranksum(XRES_s(:,j,4),XRES_s(:,j,6),'tail','right');
+	    XRES_U(j,4)=ranksum(XRES_s(:,j,5),XRES_s(:,j,6),'tail','right');
+	end
+
+	for j=1:length(LOOP.(LOOP.NamNoise))
+	    RRES_U(j,1)=ranksum(RRES_s(:,j,1),RRES_s(:,j,3),'tail','right');
+	    RRES_U(j,2)=ranksum(RRES_s(:,j,2),RRES_s(:,j,3),'tail','right');
+	    RRES_U(j,3)=ranksum(RRES_s(:,j,4),RRES_s(:,j,6),'tail','right');
+	    RRES_U(j,4)=ranksum(RRES_s(:,j,5),RRES_s(:,j,6),'tail','right');
+	end
+
+	% pad with zero vectors to increase spacing between bar groups
+	XRES_sa = [XRES_sa; zeros(2,6)];
+	XRES_sstd = [XRES_sstd; zeros(2,6)];
+
+	RRES_sa = [RRES_sa; zeros(2,6)];
+	RRES_sstd = [RRES_sstd; zeros(2,6)];
+
+	clear gca;      
+	figure
+	name = {'MAI';'MAI_{ext}';'MAI_{RR-I}';'MPZ';'MPZ_{ext}';'MPZ_{RR-I}'};
+	bar(XRES_sa',1.2);
+	hold on
+	bar(XRES_sstd',1.2,'FaceColor',[0 0 0])
+	hold off
+	f=get(gca,'Children');
+	f=flipud(f(3:end));
+	lgd=strsplit(num2str(LOOP.(LOOP.NamNoise),'%d '));
+	% need to skip items in legend
+	for i=1:length(lgd)
+	    legendInfo{i} = ['SNR = ', lgd{i}, ' dB']; 
+	end
+	l=legend(f,legendInfo);	
+	l.Location='northwest';
+	set(gca,'XTickLabel',name);
+	ylabel('Average localization error [mm]')
+	% ax = findobj(gcf,'type','axes'); 
+	print(gcf,[fullfile(pwd,filesep), strcat(myName,'_XRES_')],'-depsc')
+
+	figure
+	bar(RRES_sa',1.2);
+	hold on
+	bar(RRES_sstd',1.2,'FaceColor',[0 0 0])
+	hold off
+	f=get(gca,'Children');
+	f=flipud(f(3:end));
+	l=legend(f,legendInfo);
+	l.Location='northwest';
+	set(gca,'XTickLabel',name);
+	ylabel('Average localization error [mm]')
+	print(gcf,[fullfile(pwd,filesep), strcat(myName,'_RRES_')],'-depsc')
+
+	clear gca;
+	figure
+	plot(XRANK,'-o','MarkerIndices',1:LOOP.totSimCount,'LineWidth',2);
+	f=get(gca,'Children');
+	f=flipud(f);
+	l=legend(f,legendInfo);
+	l.Location='northwest';
+	axis([1 LOOP.totSimCount 1 sum(SETUP.SRCS(:,1))])
+	xlabel('Simulation run')
+	xticks([1:LOOP.totSimCount])
+	ylabel('Rank selected')
+	yticks([1:sum(SETUP.SRCS(:,1))])
+	print(gcf,[fullfile(pwd,filesep), strcat(myName,'_XRANK_')],'-depsc')
+
+      #+END_SRC
 *** [p01] Main LOOP
 
-   #+NAME: ./tg_s08_LOOP___01_Main_LOOP.m
-   #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s08_LOOP___01_Main_LOOP.m :results silent
+    #+NAME: ./tg_s08_LOOP___01_Main_LOOP.m
+    #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s08_LOOP___01_Main_LOOP.m :results silent
 
-     [LOOP.c01RR,LOOP.c02MM,LOOP.c03BB,LOOP.c04II] = ndgrid(LOOP.rngSimCount,LOOP.rngMesNoise,LOOP.rngBcgNoise,LOOP.rngIntNoise);
-     LOOP.coords = [LOOP.c01RR(:),LOOP.c02MM(:),LOOP.c03BB(:),LOOP.c04II(:)];
+      [LOOP.c01RR,LOOP.c02MM,LOOP.c03BB,LOOP.c04II] = ndgrid(LOOP.rngSimCount,LOOP.rngMesNoise,LOOP.rngBcgNoise,LOOP.rngIntNoise);
+      LOOP.coords = [LOOP.c01RR(:),LOOP.c02MM(:),LOOP.c03BB(:),LOOP.c04II(:)];
 
-     2 == length(size(squeeze(double.empty([[length(LOOP.rngMesNoise),length(LOOP.rngBcgNoise),length(LOOP.rngIntNoise)],0]))))
-     if 2 == length(size(squeeze(double.empty([[length(LOOP.rngMesNoise),length(LOOP.rngBcgNoise),length(LOOP.rngIntNoise)],0]))))
-         if max([length(LOOP.rngMesNoise),length(LOOP.rngBcgNoise),length(LOOP.rngIntNoise)]) == min([length(LOOP.rngMesNoise),length(LOOP.rngBcgNoise),length(LOOP.rngIntNoise)]),
-             LOOP.IdxNoise = 0;
-         else,
-             [~,LOOP.IdxNoise] = max([length(LOOP.rngMesNoise),length(LOOP.rngBcgNoise),length(LOOP.rngIntNoise)]);
-         end;
-         if LOOP.IdxNoise == 1,
-             LOOP.NamNoise = 'rngMesNoise';
-         elseif LOOP.IdxNoise == 2,
-             LOOP.NamNoise = 'rngBcgNoise';
-         elseif LOOP.IdxNoise == 3,
-             LOOP.NamNoise = 'rngIntNoise';
-         else,
-             LOOP.NamNoise = 'AnyNoise';
-         end;
-     else,
-         error('CYBERCRAFT:: ensure that only one noise type is vector and the remaining are scalars');
-     end;
-     LOOP.iterations = []; LOOP.progress = []; LOOP.table_arrC = []; LOOP.table_varN = {}; LOOP.table_rowN = {};
+      2 == length(size(squeeze(double.empty([[length(LOOP.rngMesNoise),length(LOOP.rngBcgNoise),length(LOOP.rngIntNoise)],0]))))
+      if 2 == length(size(squeeze(double.empty([[length(LOOP.rngMesNoise),length(LOOP.rngBcgNoise),length(LOOP.rngIntNoise)],0]))))
+	  if max([length(LOOP.rngMesNoise),length(LOOP.rngBcgNoise),length(LOOP.rngIntNoise)]) == min([length(LOOP.rngMesNoise),length(LOOP.rngBcgNoise),length(LOOP.rngIntNoise)]),
+	      LOOP.IdxNoise = 0;
+	  else,
+	      [~,LOOP.IdxNoise] = max([length(LOOP.rngMesNoise),length(LOOP.rngBcgNoise),length(LOOP.rngIntNoise)]);
+	  end;
+	  if LOOP.IdxNoise == 1,
+	      LOOP.NamNoise = 'rngMesNoise';
+	  elseif LOOP.IdxNoise == 2,
+	      LOOP.NamNoise = 'rngBcgNoise';
+	  elseif LOOP.IdxNoise == 3,
+	      LOOP.NamNoise = 'rngIntNoise';
+	  else,
+	      LOOP.NamNoise = 'AnyNoise';
+	  end;
+      else,
+	  error('CYBERCRAFT:: ensure that only one noise type is vector and the remaining are scalars');
+      end;
+      LOOP.progress = []; LOOP.table_arrC = []; LOOP.table_varN = {}; LOOP.table_rowN = {};
 
-     for LoopSimCount = 1:LOOP.totSimCount
-         run('./tg_s07_BATCH___02_Signals.m');
-         run('./tg_s07_BATCH___03_Leadfields.m');
-         for LoopIntNoise = 1:length(LOOP.rngIntNoise)
-             for LoopBcgNoise = 1:length(LOOP.rngBcgNoise)
-                 for LoopMesNoise = 1:length(LOOP.rngMesNoise)
+      for LoopSimCount = 1:LOOP.totSimCount
+	  LoopIterCount = [];      
+	  run('./tg_s07_BATCH___02_Signals.m');
+	  run('./tg_s07_BATCH___03_Leadfields.m');
+	  for LoopIntNoise = 1:length(LOOP.rngIntNoise)
+	      for LoopBcgNoise = 1:length(LOOP.rngBcgNoise)
+		  for LoopMesNoise = 1:length(LOOP.rngMesNoise)
 
-                     LOOP.iterations = [LOOP.iterations;LoopSimCount,LoopMesNoise,LoopBcgNoise,LoopIntNoise];
-                     LOOP.progress   = [LOOP.progress;LoopSimCount,LOOP.rngMesNoise(LoopMesNoise),LOOP.rngBcgNoise(LoopBcgNoise),LOOP.rngIntNoise(LoopIntNoise)];
-                     fprintf('\n');
-                     disp('============================')
-                     disp(['CurrIter: ',num2str(size(LOOP.progress,1)),' of ',num2str(size(LOOP.coords,1))])
-                     disp('----------------------------')
-                     disp(['SimCount: ',num2str(LoopSimCount),' of ',num2str(LOOP.totSimCount)])
-                     disp(['MesNoise: ',num2str(LoopMesNoise),' of ',num2str(length(LOOP.rngMesNoise)),' (',num2str(LOOP.rngMesNoise(LoopMesNoise)),' dB in ' ,'[ ',num2str(LOOP.rngMesNoise),' ])'])
-                     disp(['BcgNoise: ',num2str(LoopBcgNoise),' of ',num2str(length(LOOP.rngBcgNoise)),' (',num2str(LOOP.rngBcgNoise(LoopBcgNoise)),' dB in ' ,'[ ',num2str(LOOP.rngBcgNoise),' ])'])
-                     disp(['IntNoise: ',num2str(LoopIntNoise),' of ',num2str(length(LOOP.rngIntNoise)),' (',num2str(LOOP.rngIntNoise(LoopIntNoise)),' dB in ' ,'[ ',num2str(LOOP.rngIntNoise),' ])'])
-                     disp('----------------------------')
-                     disp(['SETUP.n00: ',num2str(SETUP.n00)])
-                     disp(['SETUP.K00: ',num2str(SETUP.K00)])
-                     % chkSim___tg_s01_PRE___001(SETUP)
-                     disp('============================')
-                     SETUP.SINR    = LOOP.rngIntNoise(LoopIntNoise);
-                     SETUP.SBNR    = LOOP.rngBcgNoise(LoopBcgNoise);
-                     SETUP.SMNR    = LOOP.rngMesNoise(LoopMesNoise);
+		      % used by localization
+		      LoopIterCount = [LoopIterCount;LoopMesNoise,LoopBcgNoise,LoopIntNoise];
+		      % used by reconstruction 
+		      LOOP.progress   = [LOOP.progress;LoopSimCount,LOOP.rngMesNoise(LoopMesNoise),LOOP.rngBcgNoise(LoopBcgNoise),LOOP.rngIntNoise(LoopIntNoise)];
+		      fprintf('\n');
+		      disp('============================')
+		      disp(['CurrIter: ',num2str(size(LOOP.progress,1)),' of ',num2str(length(LOOP.coords))])
+		      disp('----------------------------')
+		      disp(['SimCount: ',num2str(LoopSimCount),' of ',num2str(LOOP.totSimCount)])
+		      disp(['MesNoise: ',num2str(LoopMesNoise),' of ',num2str(length(LOOP.rngMesNoise)),' (',num2str(LOOP.rngMesNoise(LoopMesNoise)),' dB in ' ,'[ ',num2str(LOOP.rngMesNoise),' ])'])
+		      disp(['BcgNoise: ',num2str(LoopBcgNoise),' of ',num2str(length(LOOP.rngBcgNoise)),' (',num2str(LOOP.rngBcgNoise(LoopBcgNoise)),' dB in ' ,'[ ',num2str(LOOP.rngBcgNoise),' ])'])
+		      disp(['IntNoise: ',num2str(LoopIntNoise),' of ',num2str(length(LOOP.rngIntNoise)),' (',num2str(LOOP.rngIntNoise(LoopIntNoise)),' dB in ' ,'[ ',num2str(LOOP.rngIntNoise),' ])'])
+		      disp('----------------------------')
+		      disp(['SETUP.n00: ',num2str(SETUP.n00)])
+		      disp(['SETUP.K00: ',num2str(SETUP.K00)])
+		      % chkSim___tg_s01_PRE___001(SETUP)
+		      disp('============================')
+		      SETUP.SINR    = LOOP.rngIntNoise(LoopIntNoise);
+		      SETUP.SBNR    = LOOP.rngBcgNoise(LoopBcgNoise);
+		      SETUP.SMNR    = LOOP.rngMesNoise(LoopMesNoise);
 
-                     run('./tg_s07_BATCH___04_SNRs.m');
-                     run('./tg_s07_BATCH___05_Filters.m');
+		      run('./tg_s07_BATCH___04_Preparations.m');
 
-                     % removes Original and Dummy signals from Figures
-                     if(SETUP.SHOWori==0)
-                         rec_res.table_rowN = rec_res.table_rowN(3:end);
-                         rec_res.table_arrC = rec_res.table_arrC(3:end,:);
-                     end
+		      switch SETUP.supSwitch
+			case {'rec'}
 
-                     LOOP.table_rowN{size(LOOP.progress,1)} = rec_res.table_rowN;
-                     LOOP.table_varN{size(LOOP.progress,1)} = rec_res.table_varN;
-                     LOOP.table_arrC(:,:,LoopSimCount,LoopMesNoise,LoopBcgNoise,LoopIntNoise) = rec_res.table_arrC;
-                 end
-             end
-         end
-     end
-     if isequal(LOOP.table_rowN{:}), LOOP.table_rowN = LOOP.table_rowN{1}; else, error('CYBERCRAFT:: row names are inconsistent'); end;
-     if isequal(LOOP.table_varN{:}), LOOP.table_varN = LOOP.table_varN{1}; else, error('CYBERCRAFT:: var names are inconsistent'); end;
+			  % Reconstruction
+			  disp('Reconstruction')
 
-   #+END_SRC
+			  run('./tg_s07_BATCH___05_Filters.m');
 
-* DOIN Supplementaries
+			  % removes Original and Dummy signals from Figures
+			  if(SETUP.SHOWori==0)
+			      rec_res.table_rowN = rec_res.table_rowN(3:end);
+			      rec_res.table_arrC = rec_res.table_arrC(3:end,:);
+			  end
+
+			  LOOP.table_rowN{size(LOOP.progress,1)} = rec_res.table_rowN;
+			  LOOP.table_varN{size(LOOP.progress,1)} = rec_res.table_varN;
+			  LOOP.table_arrC(:,:,LoopSimCount,LoopMesNoise,LoopBcgNoise,LoopIntNoise) = rec_res.table_arrC;
+
+			case {'loc'}
+
+			  % Localization
+			  disp('Localization')
+
+			  run('tg_s07_BATCH___05_Localizers.m');
+
+			  % use LOOP.RES.ITERATION{x}{y}(z) to access results struct for 
+			  % z-th activity index (z=1,2,...,8 with z=1 for MAI(2011) etc., as defined in !run MAI and MPZ Locallizers) 
+			  % y-th level of SNR of type considered (interference, biological, measurement)
+			  % x-th iteration of the experiment
+			  LOOP.RES.ITERATION{LoopSimCount}{size(LoopIterCount,1)} = RES;
+
+			  % temporary helper code
+			  % save(['RES__','ITERATION_',num2str(LoopSimCount),'__SINR_',num2str(SETUP.SINR),'__SBNR_',num2str(SETUP.SBNR),'__SMNR_',num2str(SETUP.SMNR)],'RES')
+
+			otherwise
+			  warning('Unexpected supSwitch value. No action taken, only data generated.')
+		      end
+		  end
+	      end
+	  end
+      end
+
+      switch SETUP.supSwitch
+	case {'rec'}
+
+	  if isequal(LOOP.table_rowN{:}), LOOP.table_rowN = LOOP.table_rowN{1}; else, error('CYBERCRAFT:: row names are inconsistent'); end;
+	  if isequal(LOOP.table_varN{:}), LOOP.table_varN = LOOP.table_varN{1}; else, error('CYBERCRAFT:: var names are inconsistent'); end;
+
+	case {'loc'}
+
+	otherwise
+	  warning('Unexpected supSwitch value. No action taken, only data generated.')
+      end
+
+    #+END_SRC
+
+* DONE Supplementaries
 ** DOIN [z00] Auxiliary functions
 *** =rawTimeSeries3d2d=
 
@@ -3389,25 +3842,6 @@ function y = rawTimeSeries3d2d(x)
 
     y = reshape(permute(x,[1,3,2]),[],size(x,2),1);
 
-    if 0
-        x = sim_sig_SrcActiv.sigSRC_pre;
-        x = sim_sig_SrcActiv.sigSRC_pst;
-
-        y = rawTimeSeries3d2d(x);
-
-        size(y)
-        close all
-        figure();plot(y(1:500,:))
-        figure();plot(x(1:500,:,1))
-
-        figure();plot(y(501:1000,:))
-        figure();plot(x(1:500,:,2))
-
-        size(y)
-
-        size(sim_sig_SrcActiv.sigSRC_pre)
-        size(sim_sig_SrcActiv.sigSRC_pst)
-    end
 end
 
     #+END_SRC
@@ -3544,54 +3978,6 @@ end
 
 function [y] = rawAdjTotSNRdB(x01,x02,newSNR)
     y = ((x02 / rawNrm(x02)) * rawNrm(x01)) / (db2pow(0.5*newSNR));
-    if 0
-        10.0^(0.05*newSNR)
-        db2pow(0.5*newSNR)
-
-        x01 = randn(1000,5)*6;
-        x01(:,1) = x01(:,1)/6;
-        x02 = randn(1000,5);
-        newSNR = 2
-        rawSNRdB(x01,x02)
-        x03 = rawAdjTotSNRdB(x01,x02,newSNR);
-        rawSNRdB(x01,x02)
-        rawSNRdB(x01,x03)
-        m02 = mean(x02)
-        m03 = mean(x03)
-        m02(1)/m02(2)
-        m03(1)/m03(2)
-
-        x01 = randn(1000,20);
-        x02 = randn(1000,10);
-        size(x01,2)/size(x02,2)
-        rawSNR(x01,x02)
-        rawSNRdB(x01,x02)
-        rawNrm(x01)
-        rawNrm(x02)
-        rawNrmCol(x01)
-        rawNrmCol(x02)
-        rawSNRdB(x01,x02)
-        2*pow2db(rawNrm(x01)./rawNrm(x02))
-        2*pow2db(rawNrmCol(x01)./rawNrmCol(x02))
-        rawSNRdB(x01(:,1),x02(:,1))
-        x02 = rawAdjTotSNRdB(x01,x02,10);
-
-        x01 = randn(1000,5)*6;
-        x02 = randn(1000,5);
-        rawNrm(x02)
-        tmp_old_prop = rawNrmCol(x02)
-        rawSNR(x01,x02)
-        rawSNRdB(x01,x02)
-        tmp_newSNR = 3
-        % [bandpower(x01);bandpower(x02)]
-        x02 = rawAdjTotSNRdB(x01,x02,tmp_newSNR);
-        % x02 = x02 / rawNrm(x02)*rawNrm(x01) / (db2pow(0.5*tmp_newSNR));
-        % [bandpower(x01);bandpower(x02)]
-        rawSNR(x01,x02)
-        rawSNRdB(x01,x02)
-        tmp_new_prop = rawNrmCol(x02)
-        tmp_new_prop./tmp_old_prop
-    end
 end
 
     #+END_SRC
@@ -3618,15 +4004,6 @@ function [y] = rawNrm(x)
 function [M] = rawMom(x01,k)
 % Compute raw moment of the k-th order for the random vector
     M = mean(x01.^k, 1);
-    if 0
-        mean(x01)
-        rawMom(x01,1)
-        mean(x01.^1,1)
-        1/size(x01,1)*sum(x01.^1,1)
-        rawMom(x01,3)
-        mean(x01.^3,1)
-        1/size(x01,1)*sum(x01.^3,1)
-    end
 end
 
     #+END_SRC
@@ -4029,76 +4406,6 @@ rm ./fun/*
       robustly from IntNoise signal (that may have lowered dimensionality)
       when compared with SigIn
     - The above also aplies to PDC
-
-*** OPEN Open questions
-
-    - [ ] przy ustalonym poziomie interferencji i szumu tła, zmieniając poziom
-    szumu measurement, wydajność filtrów ładnie rośnie wraz ze spadkiem
-    szumu - expected behaviour; natomiast przy ustalonym poziomie
-    interferencji i szumu measurement, zmieniając poziom szumu tła,
-    wydajność filtrów nie zależy praktycznie od SBNR - czy dobrze ustawiamy
-    poziomy szumu?
-
-    - [ ] przy niskiej interferncji SINR=20 dB filtry sMVP_NL_XXX kilujące
-    interferencję dalej sobie bdb radzą - czyżbyśmy byli genialni, a może
-    coś z ustawieniami poziomu szumu nie funga?
-
-    - [ ] krótka długość sygnału nie zabija MMSE, a powinna - z czego
-    estymujemy macierze kowariancji? Jutro sobie wyjaśnijmy?
-
-    - [ ] ustawienie
-    SETUP.n00    = 500;     % number of time samples per trial
-    SETUP.K00    = 1;      % number of independent realizations of signal and noise based on generated MVAR model
-
-    powoduje generację błędu - czy chodzi o brak możliwości dopasowania modelu MVAR? Jeżeli tak, czy można zrobić
-    wersję "activity reconstruction only", bez dopasowania PDC odtworzonych sygnałów?
-
-*** OPEN Theory <-> Practice tests
-
-    NB: Udaje się już zejść do realizacji r=1 i długości sygnału s=200 (do s=100
-    nie, arfit generuje błąd "too short time series", co jest zrozumiałe).
-
-**** Measurement noise
-
-     1. Tylko measurement noise, SMNR = 20, r=50, s=500 (długi sygnał,
-     powtórzony wiele razy)
-     :: OK (b. małe błędy filtrów)
-
-     2. Tylko measurement noise, SMNR = 20, r=1, s=200 (krótki sygnał, powtórzony raz)
-     :: OK (małe błędy filtrów zależnych od N (można wyestymować łatwo, tylko
-     biały szum), większe zależnych od R (wyestymować trudniej, sygnał nie
-     jest biały))
-
-     3. Tylko measurement noise, SMNR = 0, r=50, s=500
-     :: OK (błędy większe niż w przypadku 1., ale porównywalne pomiędzy
-     filtrami używającymi R i N, MMSE bdb)
-
-     4. Tylko measurement noise, SMNR = 0, r=1, s=200
-     :: OK (błędy porównywalne pomiędzy filtrami używającymi R i N, MMSE
-     gorzej, filtry EIG dobrze)
-
-     PODSUMOWANIE: ZACHOWANIE DLA MEASUREMENT NOISE ZGODNE Z TEORIĄ
-
-**** Biological noise
-
-     1. Tylko biological noise, SBNR = 20, r=50, s=500 (długi sygnał,
-     powtórzony wiele razy)
-     :: NIE-OK (gargantuiczny błąd MMSE, LCMV_N, wybierane rzędy sMVPxx bardzo
-     niskie, tylko LCMV_R wygląda sensownie - bardzo mały błąd). OCZEKIWANE
-     ZACHOWANIE: bardzo małe błędy wszystkich filtrów (sygnał 1000 mocniejszy od szumu
-     tła, bardzo długi sygnał do wyestymowania R i N).
-
-     CHECK ABORTED HERE.
-
-** CHCK [z03] Also see
-
-   See:
-   - [[../palmaDeMallorca/1570255558_revised.pdf]]
-   - [[./img]]
-   - [[./fig]]
-   - [[~/cc_overkill/pdf/papers/2001%20-%20Baillet,Mosher,LEAHY%20-%20Electromagnetic%20Brain%20Mapping%20IEEESPMAG_No.pdf][2001 - Baillet,Mosher,LEAHY - Electromagnetic Brain Mapping IEEESPMAG_No.pdf]]
-   - [[~/cc_overkill/git/exProc/students/eeg/sources]]
-
 ** DONE [z91] GNU Emacs specific settings
 
    #+BEGIN_SRC emacs-lisp :eval yes :results output silent
@@ -4130,8 +4437,8 @@ rm ./fun/*
 *** TODO ERPs figure
 *** TODO Simulations work flow diagram
 
-   #+NAME: ./tg_i01_Introduction___01_Simul_diagram.m
-   #+BEGIN_SRC ditaa :file ./tg_i01_Gen_intro___01_Simul_diagram.png :cmdline -E :tangle ./tg_i01_Gen_intro___01_Simul_diagram.ditaa
+    #+NAME: ./tg_i01_Introduction___01_Simul_diagram.m
+    #+BEGIN_SRC ditaa :file ./tg_i01_Gen_intro___01_Simul_diagram.png :cmdline -E :tangle ./tg_i01_Gen_intro___01_Simul_diagram.ditaa
 
 /--------------------------\       /--------------------------\
 | sel_atl.mat              |       | ROIs                     |
@@ -4196,12 +4503,12 @@ rm ./fun/*
                 |                        |
                 \------------------------/
 
-   #+END_SRC
-   #+CAPTION: Diagram describing outline of the simulations work flow
-   #+LABEL: fig:org_fig
-   #+ATTR_LATEX: :width 0.5\textwidth
+    #+END_SRC
+    #+CAPTION: Diagram describing outline of the simulations work flow
+    #+LABEL: fig:org_fig
+    #+ATTR_LATEX: :width 0.5\textwidth
 
-   #+RESULTS:
-   [[file:./tg_i01_Gen_intro___01_Simul_diagram.png]]
+    #+RESULTS:
+    [[file:./tg_i01_Gen_intro___01_Simul_diagram.png]]
 *** TODO Neuro-scientific background introduction
-*** TODO improve plotting (dodać =r_opt= i =num_of_hist_bins=)
+

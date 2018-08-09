@@ -8,6 +8,23 @@ sim_geo_cort.splitSRC = {};
 for ii = 1:length(sim_geo_cort.distrROIsSum)
     sim_geo_cort.splitSRC(ii,:) = mat2cell(sim_geo_cort.bulkSRC{ii},sim_geo_cort.distrROIs(ii,:),1)';
 end
+
+if 0
+    sim_geo_cort.splitSRC(1,1)
+    sim_geo_cort.splitSRC{1,1}
+end
+
+if SETUP.rPNT
+    disp('CC: using random source locations')
+else
+    disp('CC: using predefined source locations')
+    sim_geo_cort.splitSRC{1,1} = [5441;5506;5481;5283;5144;5063;5823;5987;6154;6065;6166;6346;6087;6446;6367;6726;6859;6829;6613;6698;6966;7162;7227;6949;6996;7365;7247;7480];
+    sim_geo_cort.splitSRC{1,1} = sim_geo_cort.splitSRC{1,1}(1:SETUP.SRCS(1,1));
+    if 0
+        sim_geo_cort.splitSRC{1,1}
+    end
+end
+
 sim_geo_cort.mergeSRC = {};
 for ii = 1:3
     sim_geo_cort.mergeSRC{ii} = cat(1,sim_geo_cort.splitSRC{:,ii});
