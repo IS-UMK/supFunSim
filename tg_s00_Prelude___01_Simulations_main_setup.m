@@ -68,7 +68,8 @@ SETUP.TELL   = 1;       % provide additional comments during code execution ("te
 SETUP.PLOT   = 1;       % plot figures during the intermediate stages
 SETUP.SCRN   = get(0,'MonitorPositions'); % get screens positions
 SETUP.DISP   = SETUP.SCRN(end,:);        % force figures to be displayed on (3dr) screenscreen
-SETUP.SEED   = rng(round(1e3*randn()^2*sum(clock)));
+SETUP.FIXED_SEED = 0; % Settings for seed selection
+if SETUP.FIXED_SEED, SETUP.SEED = rng(1964);else,SETUP.SEED = rng(round(1e3*randn()^2*sum(clock)));end
 SETUP.RANK_EIG = sum(SETUP.SRCS(:,1)); % rank of EIG-LCMV filter: set to number of active sources
 SETUP.fltREMOVE = 1; % to keep (0) or remove (1) selected filters
 SETUP.SHOWori = 1; % to show (1) or do not show (0) Original and Dummy signals on Figures

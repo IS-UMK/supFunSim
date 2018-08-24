@@ -35,11 +35,13 @@ SETUP.n00    = 500;     % number of time samples per trial
 SETUP.K00    = 1;       % number of independent realizations of signal and noise based on generated MVAR model
 			% note: covariance matrix R of observed signal and noise covariance matrix N are
 			% estimated from samples originating from all realizations of signal and noise
+SETUP.FIXED_SEED = 1; % Settings for seed selection
+if SETUP.FIXED_SEED, SETUP.SEED = rng(1964);else,SETUP.SEED = rng(round(1e3*randn()^2*sum(clock)));end
 SETUP.RANK_EIG = sum(SETUP.SRCS(:,1)); % rank of EIG-LCMV filter: set to number of active sources
 SETUP.fltREMOVE = 1;    % to keep (0) or remove (1) selected filters
 SETUP.SHOWori = 0; % to show (1) or do not show (0) Original and Dummy signals on Figures
 SETUP.IntLfgRANK = round(0.3*sum(SETUP.SRCS(:,2))); % rank of patch-constrained reduced-rank leadfield
-SETUP.supSwitch = 'loc'; % 'rec': run reconstruction of sources activity, 'loc': find active sources
+SETUP.supSwitch = 'rec'; % 'rec': run reconstruction of sources activity, 'loc': find active sources
 
 SETUP.SINR           = 0;     % signal to interference noise power ratio expressed in dB (both measured on electrode level)
 SETUP.SBNR           = 0;    % signal to biological noise power ratio expressed in dB (both measured on electrode level)
