@@ -13,9 +13,9 @@ LOOP.totSimCount = 10;
 LOOP.rngSimCount = 1:LOOP.totSimCount;
 
 % Range of SNRs 
-LOOP.rngMesNoise = 0;
-LOOP.rngBcgNoise = [0:5:10];
-LOOP.rngIntNoise = 0;
+LOOP.rngMesNoise = 10;
+LOOP.rngBcgNoise = 0;
+LOOP.rngIntNoise = [0:5:10];
 
 LOOP
 SETUP

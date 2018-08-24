@@ -13,7 +13,7 @@ run('./tg_s00_Prelude___02_SNR_Adjustments.m')
 % Rows of SETUP.SRCS reppresent ROIs.
 % Cols of SETUP.SRCS represent SrcActiv, IntNoise and BcgNoise, respectively.
 SETUP.rROI   = logical(1);       % random (1) or predefined (0) ROIs
-SETUP.rPNT   = logical(0);       % random (1) or predefined (0) candidate points for source locations: if 0, 
+SETUP.rPNT   = logical(1);       % random (1) or predefined (0) candidate points for source locations: if 0, 
 				 % number of sources as in SETUP.SRCS(1,1) will be fixed and in close locations
 SETUP.SRCS   = []; % Cortical sources (avoid placing more than 10 sources in single ROI)
 SETUP.SRCS   = [ SETUP.SRCS;  3  0  3 ];
@@ -43,6 +43,10 @@ SETUP.SHOWori = 0; % to show (1) or do not show (0) Original and Dummy signals o
 SETUP.IntLfgRANK = round(0.3*sum(SETUP.SRCS(:,2))); % rank of patch-constrained reduced-rank leadfield
 SETUP.supSwitch = 'rec'; % 'rec': run reconstruction of sources activity, 'loc': find active sources
 
+SETUP.CUBE           = 20;    % perturbation of the leadfields based on the shift of source position within a cube of given edge length (centered at the original leadfields positions), in [mm]
+SETUP.CONE           = pi/32; % perturbation of the leadfields based on the rotation of source orientation (azimuth TH, elevation PHI), in [rad]
+SETUP.H_Src_pert     = 1;     % use original (0) or perturbed (1) leadfield for signal reconstruction
+SETUP.H_Int_pert     = 0;     % use original (0) or perturbed (1) leadfield for nulling constrains
 SETUP.SINR           = 0;     % signal to interference noise power ratio expressed in dB (both measured on electrode level)
 SETUP.SBNR           = 0;    % signal to biological noise power ratio expressed in dB (both measured on electrode level)
 SETUP.SMNR           = 0;    % signal to measurment noise power ratio expressed in dB (both measured on electrode level)

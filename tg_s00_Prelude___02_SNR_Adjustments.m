@@ -1,5 +1,5 @@
-SETUP.CUBE           = 20;    % perturbation of the leadfields based on the shift of source position within a cube of given edge length (centered at the original leadfields positions)
-SETUP.CONE           = pi/32; % perturbation of the leadfields based on the rotation of source orientation (azimuth TH, elevation PHI)
+SETUP.CUBE           = 20;    % perturbation of the leadfields based on the shift of source position within a cube of given edge length (centered at the original leadfields positions), in [mm]
+SETUP.CONE           = pi/32; % perturbation of the leadfields based on the rotation of source orientation (azimuth TH, elevation PHI), in [rad]
 SETUP.H_Src_pert     = 0;     % use original (0) or perturbed (1) leadfield for signal reconstruction
 SETUP.H_Int_pert     = 0;     % use original (0) or perturbed (1) leadfield for nulling constrains
 SETUP.SINR           = 5;     % signal to interference noise power ratio expressed in dB (both measured on electrode level)
