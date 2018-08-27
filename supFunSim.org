@@ -2307,7 +2307,7 @@ end
 P_sMVP_R_opt = U_K_R(:,1:sMVP_R_rank_opt)*U_K_R(:,1:sMVP_R_rank_opt)';
 
 rec_opt.ranks.sMVP_R = sMVP_R_rank_opt;
-clear K_MSE K_R U_K_R W_K_R p_K_R sMVP_R_ranks sMVP_R_rank_opt;
+clear K_MSE K_R W_K_R p_K_R sMVP_R_ranks;
 
        #+END_SRC
 
@@ -2335,7 +2335,7 @@ end
 P_sMVP_N_opt = U_K_N(:,1:sMVP_N_rank_opt)*U_K_N(:,1:sMVP_N_rank_opt)';
 
 rec_opt.ranks.sMVP_N = sMVP_N_rank_opt;
-clear K_MSE_N K_N U_K_N W_K_N p_K_N sMVP_N_ranks sMVP_N_rank_opt;
+clear K_MSE_N K_N W_K_N p_K_N sMVP_N_ranks;
 
        #+END_SRC
 
@@ -3338,17 +3338,17 @@ sim_sig_BcgNoise.sigSRC_pst = sim_sig_BcgNoise.sigSRC_pre
       SETUP.rPNT   = logical(1);       % random (1) or predefined (0) candidate points for source locations: if 0, 
 				       % number of sources as in SETUP.SRCS(1,1) will be fixed and in close locations
       SETUP.SRCS   = []; % Cortical sources (avoid placing more than 10 sources in single ROI)
-      SETUP.SRCS   = [ SETUP.SRCS;  3  0  3 ];
-      SETUP.SRCS   = [ SETUP.SRCS;  3  0  3 ];
-      SETUP.SRCS   = [ SETUP.SRCS;  3  1  3 ];
-      SETUP.SRCS   = [ SETUP.SRCS;  0  4  3 ];
-      SETUP.SRCS   = [ SETUP.SRCS;  0  4  3 ];
-      SETUP.SRCS   = [ SETUP.SRCS;  0  4  3 ];
-      SETUP.SRCS   = [ SETUP.SRCS;  0  4  3 ];
-      SETUP.SRCS   = [ SETUP.SRCS;  0  0  3 ];
-      SETUP.SRCS   = [ SETUP.SRCS;  0  0  3 ];
-      SETUP.SRCS   = [ SETUP.SRCS;  0  0  3 ];
-      SETUP.DEEP   = [              0  1  6 ]; % deep sources
+      SETUP.SRCS   = [ SETUP.SRCS;  3  3  0 ];
+      SETUP.SRCS   = [ SETUP.SRCS;  3  3  0 ];
+      SETUP.SRCS   = [ SETUP.SRCS;  3  3  0 ];
+      SETUP.SRCS   = [ SETUP.SRCS;  4  3  0 ];
+      SETUP.SRCS   = [ SETUP.SRCS;  0  3  0 ];
+      SETUP.SRCS   = [ SETUP.SRCS;  0  3  0 ];
+      SETUP.SRCS   = [ SETUP.SRCS;  0  3  0 ];
+      SETUP.SRCS   = [ SETUP.SRCS;  0  3  0 ];
+      SETUP.SRCS   = [ SETUP.SRCS;  0  3  3 ];
+      SETUP.SRCS   = [ SETUP.SRCS;  0  0  4 ];
+      SETUP.DEEP   = [              0  0  20 ]; % deep sources
 
       SETUP.ERPs   = 0;       % Add ERPs (timelocked activity)
 
@@ -3489,7 +3489,7 @@ run('./tg_s06_Error_evaluation.m')
     LOOP.NAME = tempname; [~, LOOP.NAME] = fileparts(LOOP.NAME); % simulation unique name
 
     % Number of simulation runs for each SNRs combination
-    LOOP.totSimCount = 10;
+    LOOP.totSimCount = 1000;
     LOOP.rngSimCount = 1:LOOP.totSimCount;
 
     % Range of SNRs 

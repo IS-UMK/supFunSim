@@ -9,7 +9,7 @@ LOOP.DATE = datestr(now,'yyyymmdd_HHMMSS');
 LOOP.NAME = tempname; [~, LOOP.NAME] = fileparts(LOOP.NAME); % simulation unique name
 
 % Number of simulation runs for each SNRs combination
-LOOP.totSimCount = 10;
+LOOP.totSimCount = 1000;
 LOOP.rngSimCount = 1:LOOP.totSimCount;
 
 % Range of SNRs 

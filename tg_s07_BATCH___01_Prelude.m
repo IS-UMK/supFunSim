@@ -16,17 +16,17 @@ SETUP.rROI   = logical(1);       % random (1) or predefined (0) ROIs
 SETUP.rPNT   = logical(1);       % random (1) or predefined (0) candidate points for source locations: if 0, 
 				 % number of sources as in SETUP.SRCS(1,1) will be fixed and in close locations
 SETUP.SRCS   = []; % Cortical sources (avoid placing more than 10 sources in single ROI)
-SETUP.SRCS   = [ SETUP.SRCS;  3  0  3 ];
-SETUP.SRCS   = [ SETUP.SRCS;  3  0  3 ];
-SETUP.SRCS   = [ SETUP.SRCS;  3  1  3 ];
-SETUP.SRCS   = [ SETUP.SRCS;  0  4  3 ];
-SETUP.SRCS   = [ SETUP.SRCS;  0  4  3 ];
-SETUP.SRCS   = [ SETUP.SRCS;  0  4  3 ];
-SETUP.SRCS   = [ SETUP.SRCS;  0  4  3 ];
-SETUP.SRCS   = [ SETUP.SRCS;  0  0  3 ];
-SETUP.SRCS   = [ SETUP.SRCS;  0  0  3 ];
-SETUP.SRCS   = [ SETUP.SRCS;  0  0  3 ];
-SETUP.DEEP   = [              0  1  6 ]; % deep sources
+SETUP.SRCS   = [ SETUP.SRCS;  3  3  0 ];
+SETUP.SRCS   = [ SETUP.SRCS;  3  3  0 ];
+SETUP.SRCS   = [ SETUP.SRCS;  3  3  0 ];
+SETUP.SRCS   = [ SETUP.SRCS;  4  3  0 ];
+SETUP.SRCS   = [ SETUP.SRCS;  0  3  0 ];
+SETUP.SRCS   = [ SETUP.SRCS;  0  3  0 ];
+SETUP.SRCS   = [ SETUP.SRCS;  0  3  0 ];
+SETUP.SRCS   = [ SETUP.SRCS;  0  3  0 ];
+SETUP.SRCS   = [ SETUP.SRCS;  0  3  3 ];
+SETUP.SRCS   = [ SETUP.SRCS;  0  0  4 ];
+SETUP.DEEP   = [              0  0  20 ]; % deep sources
 
 SETUP.ERPs   = 0;       % Add ERPs (timelocked activity)
 
