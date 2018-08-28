@@ -2091,7 +2091,7 @@ C_SrcInt = pinv(S_SrcInt) - pinv(G_SrcInt);
 C_NL = C_SrcInt(1:size(H_Src,2),1:size(H_Src,2));
 C = pinv(S)-pinv(G);
 
-clear U_H_Int Si_H_Int V_H_Int G_SrcInt S_SrcInt C_SrcInt;
+clear U_H_Int Si_H_Int V_H_Int G_SrcInt S_SrcInt;
 
        #+END_SRC
 
@@ -2227,7 +2227,7 @@ whos
       #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s05_Spatial_filtering___01_Preparation.m :results silent
 
 %  NL filter as proposed in Hui & Leahy 2010
-H_SrcInt   = [H_Src H_Int];
+H_SrcInt = [H_Src H_Int];
 P_NL = [eye(size(H_Src,2)) zeros(size(H_Src,2),size(H_Int,2))];
 
       #+END_SRC
@@ -2485,6 +2485,15 @@ rec_flt.MMSE = C*H_Src'*pinv(R);
 
       #+END_SRC
 
+***** MMSE_INT
+
+     #+NAME: ./tg_s05_Spatial_filtering___02_Definitions.m
+     #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s05_Spatial_filtering___02_Definitions.m :results silent
+
+rec_flt.MMSE_INT = C_SrcInt(1:size(H_Src,2),:)*H_SrcInt'*pinv(R);
+
+     #+END_SRC
+
 ***** ZF
 
       #+NAME: ./tg_s05_Spatial_filtering___02_Definitions.m
@@ -2559,7 +2568,6 @@ rec_flt.sMVP_NL_N = P_sMVP_NL_N_opt*pinv(P_sMVP_NL_N*H_Src_N)*P_sMVP_NL_N*pinv(s
       #+BEGIN_SRC matlab :session *MATLAB* :eval yes :tangle ./tg_s05_Spatial_filtering___02_Definitions.m :results silent
 
 if(SETUP.fltREMOVE)
-    rec_flt = rmfield(rec_flt,'ZF');
     rec_flt = rmfield(rec_flt,'RANDN');
     rec_flt = rmfield(rec_flt,'ZEROS');
 end
@@ -3469,7 +3477,7 @@ run('./tg_s06_Error_evaluation.m')
 
 *** [p00] RUN All
 **** Execute loop
-
+     
      - Simulation settings can be modified in:
      - [[*%5Bs00%5D%20Prelude][{s00} Prelude]]
      - [[id:6718d735-94d9-48ae-ae42-1e9f3b3e0799][Prelude (with *optional settings overwrite*)]], above
@@ -3525,6 +3533,7 @@ run('./tg_s06_Error_evaluation.m')
        LOOP.table_rowN
        size(LOOP.table_arrC)
 
+       % avg and std arrays #filters x #error_measures x #SXNR_levels 
        LOOP.table_arrC_avgSimCount = squeeze(mean(LOOP.table_arrC,3))
        LOOP.table_arrC_stdSimCount = squeeze(std(LOOP.table_arrC,[],3))
        size(LOOP.table_arrC_avgSimCount)
@@ -3533,12 +3542,6 @@ run('./tg_s06_Error_evaluation.m')
        mySave = ['./res___',LOOP.DATE,'___',LOOP.NAME,'___',datestr(now,'yyyymmdd_HHMMSS')];
        save(mySave)
        LOOP
-       % remove done filters from plot (for good)
-       myRem = not(ismember(LOOP.table_rowN,{'ZF','Dummy','ZEROS'}))
-       LOOP.table_rowN = LOOP.table_rowN(myRem,:)
-       LOOP.table_arrC_avgSimCount = LOOP.table_arrC_avgSimCount(myRem,:,:)
-       LOOP.table_arrC_stdSimCount = LOOP.table_arrC_stdSimCount(myRem,:,:)
-       LOOP.table_arrC = LOOP.table_arrC(myRem,:,:,:,:,:)
 
        close all
        for ii = 1:length(LOOP.table_varN)

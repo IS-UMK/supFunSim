@@ -1,5 +1,5 @@
 %  NL filter as proposed in Hui & Leahy 2010
-H_SrcInt   = [H_Src H_Int];
+H_SrcInt = [H_Src H_Int];
 P_NL = [eye(size(H_Src,2)) zeros(size(H_Src,2),size(H_Int,2))];
 
 %  EIG-LCMV filter

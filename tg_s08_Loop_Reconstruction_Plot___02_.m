@@ -3,6 +3,7 @@ LOOP.table_varN'
 LOOP.table_rowN
 size(LOOP.table_arrC)
 
+% avg and std arrays #filters x #error_measures x #SXNR_levels 
 LOOP.table_arrC_avgSimCount = squeeze(mean(LOOP.table_arrC,3))
 LOOP.table_arrC_stdSimCount = squeeze(std(LOOP.table_arrC,[],3))
 size(LOOP.table_arrC_avgSimCount)
@@ -11,12 +12,6 @@ size(LOOP.table_arrC_avgSimCount)
 mySave = ['./res___',LOOP.DATE,'___',LOOP.NAME,'___',datestr(now,'yyyymmdd_HHMMSS')];
 save(mySave)
 LOOP
-% remove done filters from plot (for good)
-myRem = not(ismember(LOOP.table_rowN,{'ZF','Dummy','ZEROS'}))
-LOOP.table_rowN = LOOP.table_rowN(myRem,:)
-LOOP.table_arrC_avgSimCount = LOOP.table_arrC_avgSimCount(myRem,:,:)
-LOOP.table_arrC_stdSimCount = LOOP.table_arrC_stdSimCount(myRem,:,:)
-LOOP.table_arrC = LOOP.table_arrC(myRem,:,:,:,:,:)
 
 close all
 for ii = 1:length(LOOP.table_varN)

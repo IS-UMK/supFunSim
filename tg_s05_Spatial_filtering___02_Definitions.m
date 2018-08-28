@@ -7,6 +7,8 @@ rec_flt.NL = P_NL*pinv(H_SrcInt'*pinv(R)*H_SrcInt)*H_SrcInt'*pinv(R);
 
 rec_flt.MMSE = C*H_Src'*pinv(R);
 
+rec_flt.MMSE_INT = C_SrcInt(1:size(H_Src,2),:)*H_SrcInt'*pinv(R);
+
 rec_flt.ZF = pinv(H_Src);
 
 rec_flt.RANDN = randn(size(H_Src'));
@@ -27,7 +29,6 @@ rec_flt.sMVP_NL_R = P_sMVP_NL_R_opt*pinv(P_sMVP_NL_R*H_Src_R)*P_sMVP_NL_R*pinv(s
 rec_flt.sMVP_NL_N = P_sMVP_NL_N_opt*pinv(P_sMVP_NL_N*H_Src_N)*P_sMVP_NL_N*pinv(sqrtm(N));
 
 if(SETUP.fltREMOVE)
-    rec_flt = rmfield(rec_flt,'ZF');
     rec_flt = rmfield(rec_flt,'RANDN');
     rec_flt = rmfield(rec_flt,'ZEROS');
 end
