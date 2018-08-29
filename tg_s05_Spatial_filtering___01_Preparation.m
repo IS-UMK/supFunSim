@@ -51,7 +51,7 @@ end
 P_sMVP_R_opt = U_K_R(:,1:sMVP_R_rank_opt)*U_K_R(:,1:sMVP_R_rank_opt)';
 
 rec_opt.ranks.sMVP_R = sMVP_R_rank_opt;
-clear K_MSE K_R W_K_R p_K_R sMVP_R_ranks;
+clear K_MSE K_R U_K_R W_K_R p_K_R sMVP_R_ranks;
 
 %  sMVP_N filter
 % note: S and G use only H_Src, as we want to recover only activity of interest, not interference
@@ -72,7 +72,7 @@ end
 P_sMVP_N_opt = U_K_N(:,1:sMVP_N_rank_opt)*U_K_N(:,1:sMVP_N_rank_opt)';
 
 rec_opt.ranks.sMVP_N = sMVP_N_rank_opt;
-clear K_MSE_N K_N W_K_N p_K_N sMVP_N_ranks;
+clear K_MSE_N K_N U_K_N W_K_N p_K_N sMVP_N_ranks;
 
 %  sMVP filters
 clear H_Src_R H_Src_N;
